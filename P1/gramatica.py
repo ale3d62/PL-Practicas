@@ -82,7 +82,7 @@ class CParser(Parser):
 
     @_('ANDOP ANDSIMB NOTOP')               #ANDOP = ANDOP '&&' NOTOP
     def ANDOP(self,p):
-        return p.OROP and p.ANDOP
+        return p.ANDOP and p.NOTOP
 
     @_('NOTOP')                             #ANDOP = NOTOP
     def ANDOP(self,p):
@@ -101,13 +101,13 @@ class CParser(Parser):
     @_('COMPOP COMPSIMB ADDOP')                       #NOTOP = COMBOP COMPSIMB ADDOP
     def COMPOP(self,p):
         if(p.COMPSIMB == "=="):
-            return p.COMOP == p.ADDOP
+            return p.COMPOP == p.ADDOP
         elif(p.COMPSIMB == "<="):
-            return p.COMOP <= p.ADDOP
+            return p.COMPOP <= p.ADDOP
         elif(p.COMPSIMB == ">="):
-            return p.COMOP >= p.ADDOP
+            return p.COMPOP >= p.ADDOP
         elif(p.COMPSIMB == "!="):
-            return p.COMOP != p.ADDOP
+            return p.COMPOP != p.ADDOP
 
     @_('ADDOP')
     def COMPOP(self,p):
@@ -142,7 +142,7 @@ class CParser(Parser):
 
     @_('"(" OROP ")"')
     def PAROP(self,p):
-        return p.OR
+        return p.OROP
 
 
     @_('VAL')
@@ -162,7 +162,7 @@ class CParser(Parser):
 if __name__ == '__main__':
     lexer = CLexer()
     parser = CParser()
-    input = "a = 1 + 1;"
+    input = "a = (3+1)/(2+2);"
     result = parser.parse(lexer.tokenize(input))
     print(result)
 
