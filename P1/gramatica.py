@@ -4,18 +4,20 @@ from sly import Parser
 
 class CLexer(Lexer):
     
-    # Set of token names. This is always required
-    tokens = { NUMBER,ID, COMPSIMB,ANDSIMB,ORSIMB}
-    # String containing ignored characters
+    tokens = {NUMBER, ID, TYPE, COMPSIMB, ANDSIMB, ORSIMB}
+
+    # Ignored characters
     ignore = ' \t'
+
+    literals = { ';', '(', ')', '=', '<', '>', '!', "+", "-", "*", "/"}
+
     # Regular expression rules for tokens
-    literals = { ';', '(', ')','=','<','>','!',"+","-","*","/"}
-    ID = r'[a-zA-Z_][a-zA-Z0-9_]*'
+    ID = r'(?!int\b|float\b|double\b|char\b)[a-zA-Z_][a-zA-Z0-9_]*'
     
     COMPSIMB = r'==|<=|>=|!='
     ORSIMB = r'\|\|'
     ANDSIMB =r'\&\&'
-    
+    TYPE = r'int|float|double|char'
 
 
     ignore_newline = r'\n+'
@@ -38,7 +40,7 @@ class CLexer(Lexer):
 
 #PARSER
 class CParser(Parser):
-    Tabla=dict()
+    Table=dict()
 
     def __init__(self):
         self.vars = {}
@@ -46,59 +48,64 @@ class CParser(Parser):
     tokens = CLexer.tokens
     debugfile='debug.txt'
 
-    # Grammar rules and actions
-    @_('OPER ";" S')                     #S = oper ';' S
-    def S(self, p):
-        return p.OPER #ESTO HAY QUE CAMBIARLO PARA PODER PONER VARIAS INSTRUCCIONES
 
-    @_('')                               #S = epsilon
+    #GRAMMAR RULES
+
+    @_('S INSTR ";"')                        #S = S instr ';'
+    def S(self, p):
+        if(p.S):
+            print(p.S)
+        return p.INSTR
+
+    @_('')                                  #S = epsilon
     def S(self,p):
         pass
 
     
-    @_('ASIG')                       #OPER = ASIG
-    def OPER(self,p):
+    @_('ASIG')                              #instr = asig
+    def INSTR(self,p):
         return p.ASIG
 
-    @_('OROP')                       #OPER = OROP
-    def OPER(self,p):
+    @_('OROP')                              #instr = orOp
+    def INSTR(self,p):
         return p.OROP
 
 
-    @_('ID "=" OPER')                       #ASIG = ID '=' OPER
+    @_('TYPE ID "=" INSTR')                 #asig = TYPE ID '=' instr
     def ASIG(self,p):
-        self.Tabla[p.ID]=p.OPER
-        return p.OPER
+        self.Table[p.ID]=p.INSTR
+        return p.INSTR
 
 
-    @_('OROP ORSIMB ANDOP')                 #OROP = OROP '||' ANDOP
+    @_('OROP ORSIMB ANDOP')                 #orOp = orOp '||' andOp
     def OROP(self,p):
-        return p.OROP or p.ANDOP
+        res = 1 if (p.OROP or p.ANDOP) else 0 #para que devuelva 1 si se hace un or con valores > 1
+        return res
 
-    @_('ANDOP')                             #OROP = ANDOP
+    @_('ANDOP')                             #orOp = andOp
     def OROP(self,p):
         return p.ANDOP
 
 
-    @_('ANDOP ANDSIMB NOTOP')               #ANDOP = ANDOP '&&' NOTOP
+    @_('ANDOP ANDSIMB NOTOP')               #andOp = andOp '&&' notOp
     def ANDOP(self,p):
-        return p.ANDOP and p.NOTOP
+        return (p.ANDOP and p.NOTOP) and 1 #para que devuelva 1 si se hace un and con valores > 1
 
-    @_('NOTOP')                             #ANDOP = NOTOP
+    @_('NOTOP')                             #andOp = notOp
     def ANDOP(self,p):
         return p.NOTOP
 
 
-    @_('"!" NOTOP')                       #NOTOP = '!' NOTOP
+    @_('"!" NOTOP')                         #notOp = '!' notOp
     def NOTOP(self,p):
         return not p.NOTOP
 
-    @_('COMPOP')                       #NOTOP = '!' NOTOP
+    @_('COMPOP')                            #notOp = compOp
     def NOTOP(self,p):
         return p.COMPOP
 
 
-    @_('COMPOP COMPSIMB ADDOP')                       #NOTOP = COMBOP COMPSIMB ADDOP
+    @_('COMPOP COMPSIMB ADDOP')             #compOp = compOp compSimb addOp
     def COMPOP(self,p):
         if(p.COMPSIMB == "=="):
             return p.COMPOP == p.ADDOP
@@ -109,60 +116,62 @@ class CParser(Parser):
         elif(p.COMPSIMB == "!="):
             return p.COMPOP != p.ADDOP
 
-    @_('ADDOP')
+    @_('ADDOP')                             #compOp = addOp
     def COMPOP(self,p):
         return p.ADDOP
 
 
-    @_('ADDOP "+" PRODOP')
+    @_('ADDOP "+" PRODOP')                  #addOp = addOp + prodOp
     def ADDOP(self,p):
         return p.ADDOP + p.PRODOP
 
-    @_('ADDOP "-" PRODOP')
+    @_('ADDOP "-" PRODOP')                  #addOp = addOp - prodOp
     def ADDOP(self,p):
         return p.ADDOP-p.PRODOP
 
-    @_('PRODOP')
+    @_('PRODOP')                            #addOp = prodOp
     def ADDOP(self,p):
         return p.PRODOP
 
 
-    @_('PRODOP "*" PAROP')
+    @_('PRODOP "*" PAROP')                  #prodOp = prodOp * parOp
     def PRODOP(self,p):
         return p.PRODOP * p.PAROP
 
-    @_('PRODOP "/" PAROP')
+    @_('PRODOP "/" PAROP')                  #prodOp = prodOp / parOp
     def PRODOP(self,p):
         return p.PRODOP / p.PAROP
         
-    @_('PAROP')
+    @_('PAROP')                             #prodOp = parOp
     def PRODOP(self,p):
         return p.PAROP
 
 
-    @_('"(" OROP ")"')
+    @_('"(" OROP ")"')                      #parOp = (orOp)
     def PAROP(self,p):
         return p.OROP
 
 
-    @_('VAL')
+    @_('VAL')                               #parOp = val
     def PAROP(self,p):
         return p.VAL
 
-    @_('NUMBER')
+    @_('NUMBER')                            #val = NUMBER
     def VAL(self,p):
         return p.NUMBER
 
-    @_('ID')
+    @_('ID')                                #val = ID
     def VAL(self,p):
-        return self.Tabla[p.ID]
+        return self.Table[p.ID]
 
 
     
 if __name__ == '__main__':
     lexer = CLexer()
     parser = CParser()
-    input = "a = (3+1)/(2+2);"
-    result = parser.parse(lexer.tokenize(input))
-    print(result)
+    text = ""
+    while(text != "exit"):
+        text = input("Enter instructions separated by ';' [or writte 'exit' to exit]\n")
+        result = parser.parse(lexer.tokenize(text))
+        print(result)
 
