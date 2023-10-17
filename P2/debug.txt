@@ -9,7 +9,7 @@ Rule 5     INSTR -> OROP
 Rule 6     INSTR -> ASIG
 Rule 7     DECLAR -> TYPE IDPRIMA
 Rule 8     IDPRIMA -> ID
-Rule 9     IDPRIMA -> IDPRIMA , ID
+Rule 9     IDPRIMA -> IDPRIMA , ASIG
 Rule 10    ASIG -> ID = INSTR
 Rule 11    ASIG -> TYPE ID = INSTR
 Rule 12    OROP -> ANDOP
@@ -48,7 +48,7 @@ Terminals, with rules where they appear:
 ANDSIMB              : 15
 CHAR                 : 29
 COMPSIMB             : 19
-ID                   : 8 9 10 11 28
+ID                   : 8 10 11 28
 NUMBER               : 31
 NUMBERF              : 30
 ORSIMB               : 13
@@ -59,7 +59,7 @@ Nonterminals, with rules where they appear:
 
 ADDOP                : 18 19 21 22
 ANDOP                : 12 13 15
-ASIG                 : 6
+ASIG                 : 6 9
 COMPOP               : 16 19
 DECLAR               : 3
 IDPRIMA              : 7 9
@@ -164,7 +164,7 @@ state 5
     (7) DECLAR -> TYPE . IDPRIMA
     (11) ASIG -> TYPE . ID = INSTR
     (8) IDPRIMA -> . ID
-    (9) IDPRIMA -> . IDPRIMA , ID
+    (9) IDPRIMA -> . IDPRIMA , ASIG
     ID              shift and go to state 23
 
     IDPRIMA                        shift and go to state 22
@@ -174,6 +174,7 @@ state 6
     (5) INSTR -> OROP .
     (13) OROP -> OROP . ORSIMB ANDOP
     ;               reduce using rule 5 (INSTR -> OROP .)
+    ,               reduce using rule 5 (INSTR -> OROP .)
     ORSIMB          shift and go to state 24
 
 
@@ -181,6 +182,7 @@ state 7
 
     (6) INSTR -> ASIG .
     ;               reduce using rule 6 (INSTR -> ASIG .)
+    ,               reduce using rule 6 (INSTR -> ASIG .)
 
 
 state 8
@@ -190,6 +192,7 @@ state 8
     ORSIMB          reduce using rule 12 (OROP -> ANDOP .)
     ;               reduce using rule 12 (OROP -> ANDOP .)
     )               reduce using rule 12 (OROP -> ANDOP .)
+    ,               reduce using rule 12 (OROP -> ANDOP .)
     ANDSIMB         shift and go to state 25
 
 
@@ -206,6 +209,7 @@ state 9
     ANDSIMB         reduce using rule 28 (VAL -> ID .)
     ORSIMB          reduce using rule 28 (VAL -> ID .)
     ;               reduce using rule 28 (VAL -> ID .)
+    ,               reduce using rule 28 (VAL -> ID .)
 
 
 state 10
@@ -215,6 +219,7 @@ state 10
     ORSIMB          reduce using rule 14 (ANDOP -> NOTOP .)
     ;               reduce using rule 14 (ANDOP -> NOTOP .)
     )               reduce using rule 14 (ANDOP -> NOTOP .)
+    ,               reduce using rule 14 (ANDOP -> NOTOP .)
 
 
 state 11
@@ -225,6 +230,7 @@ state 11
     ORSIMB          reduce using rule 16 (NOTOP -> COMPOP .)
     ;               reduce using rule 16 (NOTOP -> COMPOP .)
     )               reduce using rule 16 (NOTOP -> COMPOP .)
+    ,               reduce using rule 16 (NOTOP -> COMPOP .)
     COMPSIMB        shift and go to state 27
 
 
@@ -271,6 +277,7 @@ state 13
     ORSIMB          reduce using rule 18 (COMPOP -> ADDOP .)
     ;               reduce using rule 18 (COMPOP -> ADDOP .)
     )               reduce using rule 18 (COMPOP -> ADDOP .)
+    ,               reduce using rule 18 (COMPOP -> ADDOP .)
     -               shift and go to state 30
     +               shift and go to state 31
 
@@ -287,6 +294,7 @@ state 14
     ORSIMB          reduce using rule 20 (ADDOP -> PRODOP .)
     ;               reduce using rule 20 (ADDOP -> PRODOP .)
     )               reduce using rule 20 (ADDOP -> PRODOP .)
+    ,               reduce using rule 20 (ADDOP -> PRODOP .)
     /               shift and go to state 32
     *               shift and go to state 33
 
@@ -303,6 +311,7 @@ state 15
     ORSIMB          reduce using rule 23 (PRODOP -> PAROP .)
     ;               reduce using rule 23 (PRODOP -> PAROP .)
     )               reduce using rule 23 (PRODOP -> PAROP .)
+    ,               reduce using rule 23 (PRODOP -> PAROP .)
 
 
 state 16
@@ -317,6 +326,7 @@ state 16
     ORSIMB          reduce using rule 26 (PAROP -> VAL .)
     ;               reduce using rule 26 (PAROP -> VAL .)
     )               reduce using rule 26 (PAROP -> VAL .)
+    ,               reduce using rule 26 (PAROP -> VAL .)
 
 
 state 17
@@ -370,6 +380,7 @@ state 18
     ORSIMB          reduce using rule 29 (VAL -> CHAR .)
     ;               reduce using rule 29 (VAL -> CHAR .)
     )               reduce using rule 29 (VAL -> CHAR .)
+    ,               reduce using rule 29 (VAL -> CHAR .)
 
 
 state 19
@@ -384,6 +395,7 @@ state 19
     ORSIMB          reduce using rule 30 (VAL -> NUMBERF .)
     ;               reduce using rule 30 (VAL -> NUMBERF .)
     )               reduce using rule 30 (VAL -> NUMBERF .)
+    ,               reduce using rule 30 (VAL -> NUMBERF .)
 
 
 state 20
@@ -398,6 +410,7 @@ state 20
     ORSIMB          reduce using rule 31 (VAL -> NUMBER .)
     ;               reduce using rule 31 (VAL -> NUMBER .)
     )               reduce using rule 31 (VAL -> NUMBER .)
+    ,               reduce using rule 31 (VAL -> NUMBER .)
 
 
 state 21
@@ -416,7 +429,7 @@ state 21
 state 22
 
     (7) DECLAR -> TYPE IDPRIMA .
-    (9) IDPRIMA -> IDPRIMA . , ID
+    (9) IDPRIMA -> IDPRIMA . , ASIG
     ;               reduce using rule 7 (DECLAR -> TYPE IDPRIMA .)
     ,               shift and go to state 35
 
@@ -578,6 +591,7 @@ state 28
     ORSIMB          reduce using rule 17 (NOTOP -> ! NOTOP .)
     ;               reduce using rule 17 (NOTOP -> ! NOTOP .)
     )               reduce using rule 17 (NOTOP -> ! NOTOP .)
+    ,               reduce using rule 17 (NOTOP -> ! NOTOP .)
 
 
 state 29
@@ -592,6 +606,7 @@ state 29
     ORSIMB          reduce using rule 28 (VAL -> ID .)
     ;               reduce using rule 28 (VAL -> ID .)
     )               reduce using rule 28 (VAL -> ID .)
+    ,               reduce using rule 28 (VAL -> ID .)
 
 
 state 30
@@ -684,9 +699,13 @@ state 34
 
 state 35
 
-    (9) IDPRIMA -> IDPRIMA , . ID
-    ID              shift and go to state 47
+    (9) IDPRIMA -> IDPRIMA , . ASIG
+    (10) ASIG -> . ID = INSTR
+    (11) ASIG -> . TYPE ID = INSTR
+    ID              shift and go to state 48
+    TYPE            shift and go to state 40
 
+    ASIG                           shift and go to state 47
 
 state 36
 
@@ -723,7 +742,7 @@ state 36
     NUMBERF         shift and go to state 19
     NUMBER          shift and go to state 20
 
-    INSTR                          shift and go to state 48
+    INSTR                          shift and go to state 49
     OROP                           shift and go to state 6
     ASIG                           shift and go to state 7
     ANDOP                          shift and go to state 8
@@ -741,6 +760,7 @@ state 37
     ORSIMB          reduce using rule 13 (OROP -> OROP ORSIMB ANDOP .)
     ;               reduce using rule 13 (OROP -> OROP ORSIMB ANDOP .)
     )               reduce using rule 13 (OROP -> OROP ORSIMB ANDOP .)
+    ,               reduce using rule 13 (OROP -> OROP ORSIMB ANDOP .)
     ANDSIMB         shift and go to state 25
 
 
@@ -751,18 +771,20 @@ state 38
     ORSIMB          reduce using rule 15 (ANDOP -> ANDOP ANDSIMB NOTOP .)
     ;               reduce using rule 15 (ANDOP -> ANDOP ANDSIMB NOTOP .)
     )               reduce using rule 15 (ANDOP -> ANDOP ANDSIMB NOTOP .)
+    ,               reduce using rule 15 (ANDOP -> ANDOP ANDSIMB NOTOP .)
 
 
 state 39
 
     (10) ASIG -> ID = INSTR .
     ;               reduce using rule 10 (ASIG -> ID = INSTR .)
+    ,               reduce using rule 10 (ASIG -> ID = INSTR .)
 
 
 state 40
 
     (11) ASIG -> TYPE . ID = INSTR
-    ID              shift and go to state 49
+    ID              shift and go to state 50
 
 
 state 41
@@ -775,6 +797,7 @@ state 41
     ORSIMB          reduce using rule 19 (COMPOP -> COMPOP COMPSIMB ADDOP .)
     ;               reduce using rule 19 (COMPOP -> COMPOP COMPSIMB ADDOP .)
     )               reduce using rule 19 (COMPOP -> COMPOP COMPSIMB ADDOP .)
+    ,               reduce using rule 19 (COMPOP -> COMPOP COMPSIMB ADDOP .)
     -               shift and go to state 30
     +               shift and go to state 31
 
@@ -791,6 +814,7 @@ state 42
     ORSIMB          reduce using rule 21 (ADDOP -> ADDOP - PRODOP .)
     ;               reduce using rule 21 (ADDOP -> ADDOP - PRODOP .)
     )               reduce using rule 21 (ADDOP -> ADDOP - PRODOP .)
+    ,               reduce using rule 21 (ADDOP -> ADDOP - PRODOP .)
     /               shift and go to state 32
     *               shift and go to state 33
 
@@ -807,6 +831,7 @@ state 43
     ORSIMB          reduce using rule 22 (ADDOP -> ADDOP + PRODOP .)
     ;               reduce using rule 22 (ADDOP -> ADDOP + PRODOP .)
     )               reduce using rule 22 (ADDOP -> ADDOP + PRODOP .)
+    ,               reduce using rule 22 (ADDOP -> ADDOP + PRODOP .)
     /               shift and go to state 32
     *               shift and go to state 33
 
@@ -823,6 +848,7 @@ state 44
     ORSIMB          reduce using rule 24 (PRODOP -> PRODOP / PAROP .)
     ;               reduce using rule 24 (PRODOP -> PRODOP / PAROP .)
     )               reduce using rule 24 (PRODOP -> PRODOP / PAROP .)
+    ,               reduce using rule 24 (PRODOP -> PRODOP / PAROP .)
 
 
 state 45
@@ -837,6 +863,7 @@ state 45
     ORSIMB          reduce using rule 25 (PRODOP -> PRODOP * PAROP .)
     ;               reduce using rule 25 (PRODOP -> PRODOP * PAROP .)
     )               reduce using rule 25 (PRODOP -> PRODOP * PAROP .)
+    ,               reduce using rule 25 (PRODOP -> PRODOP * PAROP .)
 
 
 state 46
@@ -851,22 +878,30 @@ state 46
     ORSIMB          reduce using rule 27 (PAROP -> ( OROP ) .)
     ;               reduce using rule 27 (PAROP -> ( OROP ) .)
     )               reduce using rule 27 (PAROP -> ( OROP ) .)
+    ,               reduce using rule 27 (PAROP -> ( OROP ) .)
 
 
 state 47
 
-    (9) IDPRIMA -> IDPRIMA , ID .
-    ,               reduce using rule 9 (IDPRIMA -> IDPRIMA , ID .)
-    ;               reduce using rule 9 (IDPRIMA -> IDPRIMA , ID .)
+    (9) IDPRIMA -> IDPRIMA , ASIG .
+    ,               reduce using rule 9 (IDPRIMA -> IDPRIMA , ASIG .)
+    ;               reduce using rule 9 (IDPRIMA -> IDPRIMA , ASIG .)
 
 
 state 48
 
-    (11) ASIG -> TYPE ID = INSTR .
-    ;               reduce using rule 11 (ASIG -> TYPE ID = INSTR .)
+    (10) ASIG -> ID . = INSTR
+    =               shift and go to state 26
 
 
 state 49
+
+    (11) ASIG -> TYPE ID = INSTR .
+    ;               reduce using rule 11 (ASIG -> TYPE ID = INSTR .)
+    ,               reduce using rule 11 (ASIG -> TYPE ID = INSTR .)
+
+
+state 50
 
     (11) ASIG -> TYPE ID . = INSTR
     =               shift and go to state 36

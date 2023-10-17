@@ -99,20 +99,22 @@ class CParser(Parser):
 
     @_('TYPE IDPRIMA')                           #declar = type idprima
     def DECLAR(self,p):
-        list = p.IDPRIMA
-        for elem in list:
-            self.Table[elem]=[0,p.TYPE]
+        #list = p.IDPRIMA
+        #for elem in list:
+            
         return
 
-    @_('IDPRIMA "," ID')                           #idprima = idprima , ID
+    @_('IDPRIMA "," ASIG')                           #idprima = idprima , ID
     def IDPRIMA(self,p):
         list = p.IDPRIMA
-        list.append(p.ID)
+        list.append(p.ASIG)
         return list
 
     @_('ID')                           #idprima = ID
     def IDPRIMA(self,p):
-        return [p.ID]
+        type=p[-2]
+        self.Table[p.ID]=[0,type] #SI EL TIPO ES UN CHAR CUIDADO CON METER UN 0
+        return p.ID
 
 
 
@@ -151,7 +153,7 @@ class CParser(Parser):
                 value=chr(value)
                 
             self.Table[p.ID][0] = value
-            return value
+            return p.ID
         except:
             raise Exception("Variable '"+p.ID+"' undefined")
 
