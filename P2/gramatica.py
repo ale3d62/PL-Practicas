@@ -95,65 +95,61 @@ class CParser(Parser):
     def INSTR(self,p):
         return p.OROP
 
-
-
-    @_('TYPE IDPRIMA')                           #declar = type idprima
+    #DECLARACIONES
+    @_('TYPE IDPRIMA')
     def DECLAR(self,p):
-        #list = p.IDPRIMA
-        #for elem in list:
-            
-        return
+        print(self.Table)
+        pass
 
-    @_('IDPRIMA "," ASIG')                           #idprima = idprima , ID
+    @_('empty ELEM REST')
     def IDPRIMA(self,p):
-        list = p.IDPRIMA
-        list.append(p.ASIG)
-        return list
+        pass
+        
+    @_('"," empty2 ELEM REST')
+    def REST(self,p):
+        pass
 
-    @_('ID')                           #idprima = ID
-    def IDPRIMA(self,p):
-        type=p[-2]
-        self.Table[p.ID]=[0,type] #SI EL TIPO ES UN CHAR CUIDADO CON METER UN 0
-        return p.ID
+    @_('')
+    def REST(self,p):
+        pass
 
+    @_('ID')
+    def ELEM(self,p):
+        self.Table[p.ID] = [0, p[-2]]
 
+    @_('ID "=" INSTR')
+    def ELEM(self,p):
+        self.Table[p.ID] = [p.INSTR, p[-4]]
 
+    #SIMULACION DE HERENCIA
+    @_('')
+    def empty(self, p):
+        return p[-1]
 
-    @_('TYPE ID "=" INSTR')                 #asig = TYPE ID '=' instr
-    def ASIG(self,p):
-        try:
-            if(p.TYPE=='int'):
-                if(type(p.INSTR)==str):
-                    self.Table[p.ID]=[ord(p.INSTR),p.TYPE]
-                else:
-                    self.Table[p.ID]=[int(p.INSTR),p.TYPE]
-            elif(p.TYPE=='float'): 
-                self.Table[p.ID]=[float(p.INSTR),p.TYPE]
-            elif(p.TYPE=='char'): 
-                self.Table[p.ID]=[str(p.INSTR),p.TYPE]
-
-            return self.Table[p.ID][0]
-        except ValueError:
-            raise Exception("Variable '"+p.ID,"' has incompatible type")
+    @_('')
+    def empty2(self, p):
+        return p[-3]
 
 
-    @_('ID "=" INSTR')                 #asig = TYPE ID '=' instr
+
+
+    @_('ID "=" INSTR')                 #asig = ID '=' instr
     def ASIG(self,p):
         try:
             type = self.Table[p.ID][1]
             value = p.INSTR
             if(type=='int'):
-                if(type(p.INSTR)==str):
-                    value = ord(value)
-                else:
-                    value = int(value)
+                #if(type(p.INSTR)==str):
+                #    value = ord(value)
+                #else:
+                value = int(value)
             elif(type=='float'): 
                 value = float(value)
             elif(type=='char'): 
                 value=chr(value)
                 
             self.Table[p.ID][0] = value
-            return p.ID
+            return self.Table[p.ID][0]
         except:
             raise Exception("Variable '"+p.ID+"' undefined")
 
