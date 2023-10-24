@@ -9,7 +9,7 @@ class CLexer(Lexer):
     # Ignored characters
     ignore = ' \t'
 
-    literals = { ';', '(', ')', '=', '<', '>', '!', "+", "-", "*", "/", ","}
+    literals = { ';', '(', ')', '=', '<', '>', '!', "+", "-", "*", "/", ",",'{','}'}
 
     # Regular expression rules for tokens
     ID = r'(?!int\b|float\b|char\b)[a-zA-Z_][a-zA-Z0-9_]*'
@@ -51,6 +51,7 @@ class CLexer(Lexer):
 #PARSER
 class CParser(Parser):
     Table=dict()
+    ambito="None"
 
     def __init__(self):
         self.vars = {}
@@ -60,15 +61,45 @@ class CParser(Parser):
 
 
     #GRAMMAR RULES
-
-    @_('S LINE ";"')                        #S = S line ';'
-    def S(self, p):
-        if(p.S):
-            print(p.S)
+    @_('S FUNCTION')
+    def S(self,p):
+        pass
+    @_('')
+    def S(self,p):
+        pass
+    @_('TYPE ID emptyF1 "(" ARGS ")" "{" LINES "}"')
+    def FUNCTION(self,p):
+        pass
+    @_('TYPE ARG RARGS' )
+    def ARGS(self,p):
+        pass
+    @_('"," TYPE ARG RARGS')
+    def RARGS(self,p):
+        pass
+    @_('')
+    def emptyF1(self,p):
+        print("hola")
+        self.ambito=p[-1]
+        print(self.ambito)
+        print(p[-2])
+        self.Table[self.ambito]=[p[-2],dict()]
+        return p[-2]
+    @_('')
+    def RARGS(self,p):
+        pass
+    @_('ID')
+    def ARG(self,p):
+        self.Table[self.ambito][1][p.ID]=[0,p[-1]]
+        print(self.Table)
+        return 
+    @_('LINES LINE ";"')                        #S = S line ';'
+    def LINES(self, p):
+        if(p.LINES):
+            print(p.LINES)
         return p.LINE
 
     @_('')                                  #S = epsilon
-    def S(self,p):
+    def LINES(self,p):
         pass
 
 
@@ -136,7 +167,7 @@ class CParser(Parser):
     @_('ID "=" INSTR')                 #asig = ID '=' instr
     def ASIG(self,p):
         try:
-            type = self.Table[p.ID][1]
+            type = self.Table[self.ambito][1][p.ID][1]
             value = p.INSTR
             if(type=='int'):
                 #if(type(p.INSTR)==str):
@@ -148,8 +179,8 @@ class CParser(Parser):
             elif(type=='char'): 
                 value=chr(value)
                 
-            self.Table[p.ID][0] = value
-            return self.Table[p.ID][0]
+            self.Table[self.ambito][1][p.ID][0] = value
+            return self.Table[self.ambito][1][p.ID][0]
         except:
             raise Exception("Variable '"+p.ID+"' undefined")
 
@@ -256,7 +287,7 @@ class CParser(Parser):
     @_('ID')                                #val = ID
     def VAL(self,p):
         try:
-            return self.Table[p.ID][0]
+            return self.Table[self.ambito][1][p.ID][0]
         except:
             raise Exception("Variable '"+p.ID+"' undefined") 
 
@@ -271,6 +302,7 @@ if __name__ == '__main__':
         text = input("Enter instructions separated by ';' [or writte 'exit' to exit]\n")
         result = parser.parse(lexer.tokenize(text))
         print(result)
+        print(parser.Table)
         #except Exception as e:
         #    print("[ERROR] " + str(e))
 
