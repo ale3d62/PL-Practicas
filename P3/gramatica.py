@@ -18,23 +18,24 @@ class CLexer(Lexer):
     ORSIMB = r'\|\|'
     ANDSIMB =r'\&\&'
     TYPE = r'int|float|char'
-    NUMBERF=r'[0-9].[0-9]+'
-    CHAR=r'\"[a-z]\"'
 
 
     ignore_newline = r'\n+'
-    @_(r'\d+')
 
+    @_(r'\d+')
     def NUMBER(self, t):
         t.value = int(t.value)
         return t
 
+    @_(r'\d.\d+')
     def NUMBERF(self, t):
         t.value = float(t.value)
         return t
 
+    @_(r'\"[a-z]\"|\'[a-z]\'')
     def CHAR(self, t):
         t.value = t.value.replace("\"", "")
+        t.value = t.value.replace("\'", "")
         return t
 
     # Line number tracking
@@ -73,6 +74,11 @@ class CParser(Parser):
     @_('TYPE ARG RARGS' )
     def ARGS(self,p):
         pass
+
+    @_('')
+    def ARGS(self,p):
+        pass
+
     @_('"," TYPE ARG RARGS')
     def RARGS(self,p):
         pass
@@ -143,7 +149,20 @@ class CParser(Parser):
 
     @_('ID "=" INSTR')
     def ELEM(self,p):
-        self.Table[self.ambito][1][p.ID]= [p.INSTR, p[-4]]
+        valueType = p[-4]
+        value = p.INSTR
+        if(valueType=='int'):
+            if(type(value)==str):
+                value = ord(value)
+            else:
+                value = int(value)
+        elif(valueType=='float'): 
+            value = float(value)
+        elif(valueType=='char'): 
+            value=chr(value)
+            
+        #self.Table[self.ambito][1][p.ID][0] = value
+        self.Table[self.ambito][1][p.ID]= [value, valueType]
 
     #SIMULACION DE HERENCIA
     @_('')
@@ -163,10 +182,10 @@ class CParser(Parser):
             type = self.Table[self.ambito][1][p.ID][1]
             value = p.INSTR
             if(type=='int'):
-                #if(type(p.INSTR)==str):
-                #    value = ord(value)
-                #else:
-                value = int(value)
+                if(type(value)==str):
+                    value = ord(value)
+                else:
+                    value = int(value)
             elif(type=='float'): 
                 value = float(value)
             elif(type=='char'): 
@@ -184,7 +203,7 @@ class CParser(Parser):
     ##
     @_('OROP ORSIMB ANDOP')                 #orOp = orOp '||' andOp
     def OROP(self,p):
-        res = 1 if (p.OROP or p.ANDOP) else 0 #para que devuelva 1 si se hace un or con valores > 1
+        res = 1 if (p.OROP or p.ANDOP) else 0 #in order to return 1 if or is done with values > 1
         return res
 
     @_('ANDOP')                             #orOp = andOp
@@ -194,7 +213,7 @@ class CParser(Parser):
 
     @_('ANDOP ANDSIMB NOTOP')               #andOp = andOp '&&' notOp
     def ANDOP(self,p):
-        return (p.ANDOP and p.NOTOP) and 1 #para que devuelva 1 si se hace un and con valores > 1
+        return (p.ANDOP and p.NOTOP) and 1 #in order to return 1 if and is done with values > 1
 
     @_('NOTOP')                             #andOp = notOp
     def ANDOP(self,p):
