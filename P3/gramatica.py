@@ -161,7 +161,6 @@ class CParser(Parser):
         elif(valueType=='char'): 
             value=chr(value)
             
-        #self.Table[self.ambito][1][p.ID][0] = value
         self.Table[self.ambito][1][p.ID]= [value, valueType]
 
     #SIMULACION DE HERENCIA
