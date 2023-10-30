@@ -2,6 +2,72 @@ from sly import Lexer
 from sly import Parser
 
 
+def esp(level, old, ne): 
+    global line
+    if level > 1:
+        if old:
+            line = line[0:(level - 2 )] + "|    "
+        else:
+            line = line[0:(level - 2)] + "  "
+    if ne:
+        line = line[0:level] + "|-->"
+    else:
+        line = line[0:level] + "|L -->"
+    return line
+
+def cuadra(t):
+    global ta, ind, tokenlist 
+    if ta.type == t:
+        ind += 1
+        if ind < len(tokenlist):
+            ta = tokenlist[ind]
+    else:
+        print("No cuadra token = ", ta.value)
+
+class Node():
+    def escribe(level, old, ne):
+        pass
+
+class InternalNode(Node):
+    def __init__(self, e, p1, p2):
+            self.label = e
+            self.pn1 = p1
+            self.pn2 = p2
+    def escribe(self, level, old, ne):
+        print(esp(level, old, ne), "node (", self.label, ")") 
+        self.pn1.escribe(level + 2, ne, True) 
+        self.pn2.escribe(level + 2, ne, False)
+
+class UniqueNode(Node):
+    def __init__(self, e, p1):
+        self.label = e
+        self.pn1 = p1
+    def escribe(self, level, old, ne):
+        print(esp(level, old, ne), "node (", self.label, ")")
+        self.pn1.escribe(level + 2, ne, True)
+
+class NodeId(Node):
+    def __init__(self, n):
+        self.name = n
+
+    def escribe(self, level, old, ne):
+        print(esp(level, old, ne), "ID(", self.name, ")")
+
+class NodeNum(Node):
+    def __init__(self, v):
+        self.value = v
+
+    def escribe(self, level, old, ne):
+        print(esp(level, old, ne), "NUM (", self.value, ")")
+
+
+
+
+
+
+
+
+
 class CLexer(Lexer):
     
     tokens = {NUMBER,NUMBERF,CHAR, ID, TYPE, COMPSIMB, ANDSIMB, ORSIMB}
@@ -61,16 +127,25 @@ class CParser(Parser):
     debugfile='debug.txt'
 
 
-    #GRAMMAR RULES
+    #-------------------------------------------------
+    #-------------GRAMMAR RULES-----------------------
+    #-------------------------------------------------
+
+    ##
+    ## FUNCTIONS
+    ##
     @_('S FUNCTION')
     def S(self,p):
         pass
+
     @_('')
     def S(self,p):
         pass
+
     @_('TYPE ID emptyF1 "(" ARGS ")" "{" LINES "}"')
     def FUNCTION(self,p):
         pass
+
     @_('TYPE ARG RARGS' )
     def ARGS(self,p):
         pass
@@ -82,18 +157,24 @@ class CParser(Parser):
     @_('"," TYPE ARG RARGS')
     def RARGS(self,p):
         pass
+
     @_('')
     def emptyF1(self,p):
         self.ambito=p[-1]
         self.Table[self.ambito]=[p[-2],dict()]
         return p[-2]
+
     @_('')
     def RARGS(self,p):
         pass
+
     @_('ID')
     def ARG(self,p):
         self.Table[self.ambito][1][p.ID]=[0,p[-2]]
         return 
+
+    
+
     @_('LINES LINE ";"')                        #S = S line ';'
     def LINES(self, p):
         return p.LINE
@@ -104,7 +185,7 @@ class CParser(Parser):
 
 
     ##
-    ## ENTRADA PRINCIPAL
+    ## MAIN INPUT
     ##
     @_('INSTR')                        #LINE = instr
     def LINE(self, p):
@@ -116,7 +197,7 @@ class CParser(Parser):
 
 
     ##
-    ## INSTRUCCIONES DEL LENGUAJE
+    ## LANGUAJE INSTRUCTIONS
     ##
     @_('ASIG')                              #instr = asig
     def INSTR(self,p):
@@ -125,8 +206,8 @@ class CParser(Parser):
     @_('OROP')                              #instr = orOp
     def INSTR(self,p):
         return p.OROP
-
-    #DECLARACIONES
+    
+    #DECLARATIONS
     @_('TYPE IDPRIMA')
     def DECLAR(self,p):
         pass
@@ -163,7 +244,7 @@ class CParser(Parser):
             
         self.Table[self.ambito][1][p.ID]= [value, valueType]
 
-    #SIMULACION DE HERENCIA
+    #INHERITANCE SIMULATION
     @_('')
     def empty(self, p):
         return p[-1]
@@ -198,7 +279,7 @@ class CParser(Parser):
 
 
     ##
-    ## OPERACIONES ARITMETICAS
+    ## ARITMETICAL OPERATIONS
     ##
     @_('OROP ORSIMB ANDOP')                 #orOp = orOp '||' andOp
     def OROP(self,p):
@@ -265,7 +346,7 @@ class CParser(Parser):
     def PRODOP(self,p):
         return p.PRODOP / p.PAROP
     ##
-    ## PARENTESIS
+    ## PARENTHESES
     ## 
     @_('PAROP')                             #prodOp = parOp
     def PRODOP(self,p):
@@ -277,7 +358,7 @@ class CParser(Parser):
         return p.OROP
 
     ##
-    ## SIMBOLOS TERMINALES
+    ## TERMINAL SYMBOLS
     ##
     @_('VAL')                               #parOp = val
     def PAROP(self,p):
@@ -308,12 +389,19 @@ if __name__ == '__main__':
     lexer = CLexer()
     parser = CParser()
     text = ""
-    while(text != "exit"):
-        #try:
-        text = input("Enter instructions separated by ';' [or writte 'exit' to exit]\n")
-        result = parser.parse(lexer.tokenize(text))
-        print(result)
-        print(parser.Table)
-        #except Exception as e:
-        #    print("[ERROR] " + str(e))
+    #try:
+    with open('input.txt',"r") as f:
+        text = f.read()
+        f.close()
+
+    print("-----INPUT CODE-----")
+    print(text)
+    print("--------------------")
+    print("")
+
+    result = parser.parse(lexer.tokenize(text))
+    print(result)
+    print(parser.Table)
+    #except Exception as e:
+    #    print("[ERROR] " + str(e))
 
