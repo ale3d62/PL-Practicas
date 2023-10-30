@@ -70,7 +70,7 @@ class NodeNum(Node):
 
 class CLexer(Lexer):
     
-    tokens = {NUMBER,NUMBERF,CHAR, ID, TYPE, COMPSIMB, ANDSIMB, ORSIMB}
+    tokens = {NUMBER,NUMBERF,CHAR, ID, TYPE, COMPSIMB, ANDSIMB, ORSIMB,MAIN}
 
     # Ignored characters
     ignore = ' \t'
@@ -78,12 +78,13 @@ class CLexer(Lexer):
     literals = { ';', '(', ')', '=', '<', '>', '!', "+", "-", "*", "/", ",",'{','}'}
 
     # Regular expression rules for tokens
-    ID = r'(?!int\b|float\b|char\b)[a-zA-Z_][a-zA-Z0-9_]*'
+    ID = r'(?!int\b|float\b|char\b|main\b)[a-zA-Z_][a-zA-Z0-9_]*'
     
     COMPSIMB = r'==|<=|>=|!='
     ORSIMB = r'\|\|'
     ANDSIMB =r'\&\&'
     TYPE = r'int|float|char'
+    MAIN = r'main'
 
 
     ignore_newline = r'\n+'
@@ -134,12 +135,20 @@ class CParser(Parser):
     ##
     ## FUNCTIONS
     ##
-    @_('S FUNCTION')
+    @_('S2 TYPE emptymain MAIN "(" ")" "{" LINES "}"')
     def S(self,p):
+        pass
+    @_("")
+    def emptymain(self,p):
+        self.ambito="main"
+        self.Table[self.ambito]=["int",dict()]
+        pass
+    @_('S2 FUNCTION')
+    def S2(self,p):
         pass
 
     @_('')
-    def S(self,p):
+    def S2(self,p):
         pass
 
     @_('TYPE ID emptyF1 "(" ARGS ")" "{" LINES "}"')
@@ -233,10 +242,10 @@ class CParser(Parser):
         valueType = p[-4]
         value = p.INSTR
         if(valueType=='int'):
-            if(type(value)==str):
-                value = ord(value)
-            else:
-                value = int(value)
+            # if(type(value)==str):
+            #     value = ord(value)
+            # else:
+            value = int(value)
         elif(valueType=='float'): 
             value = float(value)
         elif(valueType=='char'): 

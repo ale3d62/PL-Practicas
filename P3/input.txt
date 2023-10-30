@@ -1,3 +1,10 @@
+
+int resta(int a,int b){
+	int c = 3-2;
+}
 int main(){
 	int a = 3+2;
 }
+
+
+
