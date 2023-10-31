@@ -1,10 +1,4 @@
-
-int resta(int a,int b){
-	int c = 3-2;
-}
 int main(){
-	int a = 3+2;
+	int a = 4;
+	printf ( "hola%d y %d", a, 2+2, 3+3);
 }
-
-
-

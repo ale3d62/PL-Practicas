@@ -2,65 +2,38 @@ from sly import Lexer
 from sly import Parser
 
 
-def esp(level, old, ne): 
-    global line
-    if level > 1:
-        if old:
-            line = line[0:(level - 2 )] + "|    "
-        else:
-            line = line[0:(level - 2)] + "  "
-    if ne:
-        line = line[0:level] + "|-->"
-    else:
-        line = line[0:level] + "|L -->"
-    return line
-
-def cuadra(t):
-    global ta, ind, tokenlist 
-    if ta.type == t:
-        ind += 1
-        if ind < len(tokenlist):
-            ta = tokenlist[ind]
-    else:
-        print("No cuadra token = ", ta.value)
-
-class Node():
-    def escribe(level, old, ne):
-        pass
-
-class InternalNode(Node):
-    def __init__(self, e, p1, p2):
-            self.label = e
-            self.pn1 = p1
-            self.pn2 = p2
-    def escribe(self, level, old, ne):
-        print(esp(level, old, ne), "node (", self.label, ")") 
-        self.pn1.escribe(level + 2, ne, True) 
-        self.pn2.escribe(level + 2, ne, False)
-
-class UniqueNode(Node):
-    def __init__(self, e, p1):
-        self.label = e
-        self.pn1 = p1
-    def escribe(self, level, old, ne):
-        print(esp(level, old, ne), "node (", self.label, ")")
-        self.pn1.escribe(level + 2, ne, True)
-
-class NodeId(Node):
-    def __init__(self, n):
-        self.name = n
-
-    def escribe(self, level, old, ne):
-        print(esp(level, old, ne), "ID(", self.name, ")")
-
-class NodeNum(Node):
-    def __init__(self, v):
-        self.value = v
-
-    def escribe(self, level, old, ne):
-        print(esp(level, old, ne), "NUM (", self.value, ")")
+class BinaryNode():
+    def __init__(self, op, p1, p2):
+        if(op=='and'):
+            self.value = p1 and p2
+        elif(op=='or'):
+            #in order to return 1 if or is done with values > 1
+            if (p1 or p2): self.value = 1 
+            else: self.value = 0
+        elif(op=='=='):
+            self.value = p1 == p2
+        elif(op=='<='):
+            self.value = p1 <= p2
+        elif(op=='>='):
+            self.value = p1 >= p2
+        elif(op=='!='):
+            self.value = p1 != p2
+        elif(op=='+'):
+            self.value = p1 + p2
+        elif(op=='-'):
+            self.value = p1 - p2
+        elif(op=='*'):
+            self.value = p1 * p2
+        elif(op=='/'):
+            self.value = p1 / p2
+        elif(op=='asig'):
+            p1.value = p2
 
 
+class UnaryNode():
+    def __init__(self, op, p1):
+        if(op=='not'):
+            self.value = not p1
 
 
 
@@ -70,21 +43,22 @@ class NodeNum(Node):
 
 class CLexer(Lexer):
     
-    tokens = {NUMBER,NUMBERF,CHAR, ID, TYPE, COMPSIMB, ANDSIMB, ORSIMB,MAIN}
+    tokens = {NUMBER,NUMBERF,CHAR, ID, TYPE, COMPSIMB, ANDSIMB, ORSIMB,MAIN,PRINT, STRING}
 
     # Ignored characters
     ignore = ' \t'
 
-    literals = { ';', '(', ')', '=', '<', '>', '!', "+", "-", "*", "/", ",",'{','}'}
+    literals = { ';', '(', ')', '=', '<', '>', '!', "+", "-", "*", "/", ',','{','}'}
 
     # Regular expression rules for tokens
-    ID = r'(?!int\b|float\b|char\b|main\b)[a-zA-Z_][a-zA-Z0-9_]*'
+    ID = r'(?!int\b|float\b|char\b|main\b|printf\b)[a-zA-Z_][a-zA-Z0-9_]*'
     
     COMPSIMB = r'==|<=|>=|!='
     ORSIMB = r'\|\|'
     ANDSIMB =r'\&\&'
     TYPE = r'int|float|char'
     MAIN = r'main'
+    PRINT= r'printf'
 
 
     ignore_newline = r'\n+'
@@ -99,12 +73,16 @@ class CLexer(Lexer):
         t.value = float(t.value)
         return t
 
-    @_(r'\"[a-z]\"|\'[a-z]\'')
+    @_(r'\'[a-z]\'')
     def CHAR(self, t):
-        t.value = t.value.replace("\"", "")
         t.value = t.value.replace("\'", "")
         return t
-
+        
+    @_(r'\".*\"')
+    def STRING(self,t):
+        t.value = t.value.replace("\"", "")
+        return t
+        
     # Line number tracking
     @_(r'\n+')
     def ignore_newline(self, t):
@@ -203,7 +181,41 @@ class CParser(Parser):
     @_('DECLAR')                        #LINE = declar
     def LINE(self, p):
         return p.DECLAR
+    
+    #@_('PRINT "(" STRING ")"')
+    #def LINE(self,p):
+        
 
+    @_('PRINT "(" STRING PRINTIDS ")"')
+    def LINE(self, p):
+        L=list()
+        L=p.PRINTIDS
+        percents=p.STRING.count("%d")
+        if(L):
+            vars=len(L)
+        else:
+            vars = 0
+            L = []
+        if(vars!=percents): 
+            raise Exception("Too many variables in printf")
+        else:
+            s=p.STRING
+            for var in L:
+                s = s.replace("%d",str(var),1)
+            print(s)
+    
+    
+    @_('"," INSTR PRINTIDS')
+    def PRINTIDS(self,p):
+        L=[]
+        L.append(p.INSTR)
+        
+        L += p.PRINTIDS
+        return L
+        
+    @_('')
+    def PRINTIDS(self,p):
+        return []
 
     ##
     ## LANGUAJE INSTRUCTIONS
@@ -292,8 +304,9 @@ class CParser(Parser):
     ##
     @_('OROP ORSIMB ANDOP')                 #orOp = orOp '||' andOp
     def OROP(self,p):
-        res = 1 if (p.OROP or p.ANDOP) else 0 #in order to return 1 if or is done with values > 1
-        return res
+        #res = 1 if (p.OROP or p.ANDOP) else 0 #in order to return 1 if or is done with values > 1
+        return BinaryNode("or",p.OROP,p.ANDOP).value
+        
 
     @_('ANDOP')                             #orOp = andOp
     def OROP(self,p):
@@ -302,7 +315,8 @@ class CParser(Parser):
 
     @_('ANDOP ANDSIMB NOTOP')               #andOp = andOp '&&' notOp
     def ANDOP(self,p):
-        return (p.ANDOP and p.NOTOP) and 1 #in order to return 1 if and is done with values > 1
+        return BinaryNode("and", p.ANDOP, p.NOTOP).value
+        #return (p.ANDOP and p.NOTOP) and 1 #in order to return 1 if and is done with values > 1
 
     @_('NOTOP')                             #andOp = notOp
     def ANDOP(self,p):
@@ -311,7 +325,8 @@ class CParser(Parser):
 
     @_('"!" NOTOP')                         #notOp = '!' notOp
     def NOTOP(self,p):
-        return not p.NOTOP
+        return UnaryNode("not", p.NOTOP).value
+        #return not p.NOTOP
 
     @_('COMPOP')                            #notOp = compOp
     def NOTOP(self,p):
@@ -321,13 +336,17 @@ class CParser(Parser):
     @_('COMPOP COMPSIMB ADDOP')             #compOp = compOp compSimb addOp
     def COMPOP(self,p):
         if(p.COMPSIMB == "=="):
-            return p.COMPOP == p.ADDOP
+            return BinaryNode('==', p.COMPOP, p.ADDOP).value
+            #return p.COMPOP == p.ADDOP
         elif(p.COMPSIMB == "<="):
-            return p.COMPOP <= p.ADDOP
+            return BinaryNode('<=', p.COMPOP, p.ADDOP).value
+            #return p.COMPOP <= p.ADDOP
         elif(p.COMPSIMB == ">="):
-            return p.COMPOP >= p.ADDOP
+            return BinaryNode('>=', p.COMPOP, p.ADDOP).value
+            #return p.COMPOP >= p.ADDOP
         elif(p.COMPSIMB == "!="):
-            return p.COMPOP != p.ADDOP
+            return BinaryNode('!=', p.COMPOP, p.ADDOP).value
+            #return p.COMPOP != p.ADDOP
 
     @_('ADDOP')                             #compOp = addOp
     def COMPOP(self,p):
@@ -336,11 +355,13 @@ class CParser(Parser):
 
     @_('ADDOP "+" PRODOP')                  #addOp = addOp + prodOp
     def ADDOP(self,p):
-        return p.ADDOP + p.PRODOP
+        return BinaryNode('+', p.ADDOP, p.PRODOP).value
+        #return p.ADDOP + p.PRODOP
 
     @_('ADDOP "-" PRODOP')                  #addOp = addOp - prodOp
     def ADDOP(self,p):
-        return p.ADDOP-p.PRODOP
+        return BinaryNode('-', p.ADDOP, p.PRODOP).value
+        #return p.ADDOP-p.PRODOP
 
     @_('PRODOP')                            #addOp = prodOp
     def ADDOP(self,p):
@@ -349,11 +370,14 @@ class CParser(Parser):
 
     @_('PRODOP "*" PAROP')                  #prodOp = prodOp * parOp
     def PRODOP(self,p):
-        return p.PRODOP * p.PAROP
+        return BinaryNode('*', p.PRODOP, p.PAROP).value
+        #return p.PRODOP * p.PAROP
 
     @_('PRODOP "/" PAROP')                  #prodOp = prodOp / parOp
     def PRODOP(self,p):
-        return p.PRODOP / p.PAROP
+        return BinaryNode('/', p.PRODOP, p.PAROP).value
+        #return p.PRODOP / p.PAROP
+        
     ##
     ## PARENTHESES
     ## 
@@ -398,19 +422,19 @@ if __name__ == '__main__':
     lexer = CLexer()
     parser = CParser()
     text = ""
-    #try:
-    with open('input.txt',"r") as f:
-        text = f.read()
-        f.close()
+    try:
+        with open('input.txt',"r") as f:
+            text = f.read()
+            f.close()
 
-    print("-----INPUT CODE-----")
-    print(text)
-    print("--------------------")
-    print("")
+        print("-----INPUT CODE-----")
+        print(text)
+        print("--------------------")
+        print("")
 
-    result = parser.parse(lexer.tokenize(text))
-    print(result)
-    print(parser.Table)
-    #except Exception as e:
-    #    print("[ERROR] " + str(e))
+        result = parser.parse(lexer.tokenize(text))
+        print(result)
+        print(parser.Table)
+    except Exception as e:
+        print("[ERROR] " + str(e))
 
