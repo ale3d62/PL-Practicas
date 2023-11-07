@@ -43,20 +43,22 @@ class UnaryNode():
 
 class CLexer(Lexer):
     
-    tokens = {NUMBER,NUMBERF,CHAR, ID, TYPE, COMPSIMB, ANDSIMB, ORSIMB,MAIN,PRINT, STRING}
+    tokens = {NUMBER,NUMBERF,CHAR, ID, TYPE, VOIDTYPE, COMPSIMB, ANDSIMB, ORSIMB,MAIN,PRINT, STRING}
 
     # Ignored characters
     ignore = ' \t'
 
-    literals = { ';', '(', ')', '=', '<', '>', '!', "+", "-", "*", "/", ',','{','}'}
+    literals = { ';', '(', ')', '=', '<', '>', '!', "+", "-", "*", "/", ',','{','}', '&'}
 
     # Regular expression rules for tokens
-    ID = r'(?!int\b|float\b|char\b|main\b|printf\b)[a-zA-Z_][a-zA-Z0-9_]*'
+    ID = r'(?!int\b|float\b|char\b|void\b|main\b|printf\b)[a-zA-Z_][a-zA-Z0-9_]*'
     
     COMPSIMB = r'==|<=|>=|!='
     ORSIMB = r'\|\|'
     ANDSIMB =r'\&\&'
+    VOIDTYPE = r'void'
     TYPE = r'int|float|char'
+    
     MAIN = r'main'
     PRINT= r'printf'
 
@@ -116,11 +118,13 @@ class CParser(Parser):
     @_('S2 TYPE emptymain MAIN "(" ")" "{" LINES "}"')
     def S(self,p):
         pass
+
     @_("")
     def emptymain(self,p):
         self.ambito="main"
         self.Table[self.ambito]=["int",dict()]
         pass
+    
     @_('S2 FUNCTION')
     def S2(self,p):
         pass
@@ -129,14 +133,23 @@ class CParser(Parser):
     def S2(self,p):
         pass
 
-    @_('TYPE ID emptyF1 "(" ARGS ")" "{" LINES "}"')
+    @_('FUNCTYPE ID emptyF1 "(" ARGS ")" "{" LINES "}"')
     def FUNCTION(self,p):
         pass
+
+    @_('TYPE')
+    def FUNCTYPE(self,p):
+        return p.TYPE
+
+    @_('VOIDTYPE')
+    def FUNCTYPE(self,p):
+        return p.VOIDTYPE
 
     @_('TYPE ARG RARGS' )
     def ARGS(self,p):
         pass
-
+    
+    
     @_('')
     def ARGS(self,p):
         pass
@@ -181,9 +194,6 @@ class CParser(Parser):
     @_('DECLAR')                        #LINE = declar
     def LINE(self, p):
         return p.DECLAR
-    
-    #@_('PRINT "(" STRING ")"')
-    #def LINE(self,p):
         
 
     @_('PRINT "(" STRING PRINTIDS ")"')
@@ -229,9 +239,17 @@ class CParser(Parser):
         return p.OROP
     
     #DECLARATIONS
-    @_('TYPE IDPRIMA')
+    @_('TYPE POINTERS IDPRIMA')
     def DECLAR(self,p):
         pass
+
+    @_('"*" POINTERS')
+    def POINTERS(self,p):
+        return p.POINTERS + "*"
+
+    @_('')
+    def POINTERS(self,p):
+        return ''
 
     @_('empty ELEM REST')
     def IDPRIMA(self,p):
@@ -247,11 +265,11 @@ class CParser(Parser):
 
     @_('ID')
     def ELEM(self,p):
-        self.Table[self.ambito][1][p.ID] =[0, p[-2]]
+        self.Table[self.ambito][1][p.ID] =[0, p[-4]+p[-3]]
 
     @_('ID "=" INSTR')
     def ELEM(self,p):
-        valueType = p[-4]
+        valueType = p[-6]+p[-4]
         value = p.INSTR
         if(valueType=='int'):
             # if(type(value)==str):
@@ -283,10 +301,10 @@ class CParser(Parser):
             type = self.Table[self.ambito][1][p.ID][1]
             value = p.INSTR
             if(type=='int'):
-                if(type(value)==str):
-                    value = ord(value)
-                else:
-                    value = int(value)
+                #if(type(value)==str):
+                #    value = ord(value)
+                #else:
+                value = int(value)
             elif(type=='float'): 
                 value = float(value)
             elif(type=='char'): 
@@ -415,6 +433,14 @@ class CParser(Parser):
             return self.Table[self.ambito][1][p.ID][0]
         except:
             raise Exception("Variable '"+p.ID+"' undefined") 
+            
+    @_('"&" ID')
+    def VAL(self,p):
+        try:
+            return p.ID
+        except:
+            raise Exception("Variable '"+p.ID+"' undefined") 
+        
 
 
     
@@ -422,19 +448,19 @@ if __name__ == '__main__':
     lexer = CLexer()
     parser = CParser()
     text = ""
-    try:
-        with open('input.txt',"r") as f:
-            text = f.read()
-            f.close()
+    #try:
+    with open('input.txt',"r") as f:
+        text = f.read()
+        f.close()
 
-        print("-----INPUT CODE-----")
-        print(text)
-        print("--------------------")
-        print("")
+    print("-----INPUT CODE-----")
+    print(text)
+    print("--------------------")
+    print("")
 
-        result = parser.parse(lexer.tokenize(text))
-        print(result)
-        print(parser.Table)
-    except Exception as e:
-        print("[ERROR] " + str(e))
+    result = parser.parse(lexer.tokenize(text))
+    print(result)
+    print(parser.Table)
+    #except Exception as e:
+    #    print("[ERROR] " + str(e))
 
