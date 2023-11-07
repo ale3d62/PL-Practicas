@@ -48,10 +48,10 @@ class CLexer(Lexer):
     # Ignored characters
     ignore = ' \t'
 
-    literals = { ';', '(', ')', '=', '<', '>', '!', "+", "-", "*", "/", ',','{','}', '&'}
+    literals = { ';', '(', ')', '=', '<', '>', '!', "+", "-", "*", "/", ',','{','}', '&', '[', ']'}
 
     # Regular expression rules for tokens
-    ID = r'(?!int\b|float\b|char\b|void\b|main\b|printf\b)[a-zA-Z_][a-zA-Z0-9_]*'
+    ID = r'(?!int\b|float\b|char\b|void\b|main\b|printf\b|\[|\])[a-zA-Z_][a-zA-Z0-9_]*'
     
     COMPSIMB = r'==|<=|>=|!='
     ORSIMB = r'\|\|'
@@ -263,9 +263,26 @@ class CParser(Parser):
     def REST(self,p):
         pass
 
-    @_('ID')
+    @_('ID ARRAY')
     def ELEM(self,p):
-        self.Table[self.ambito][1][p.ID] =[0, p[-4]+p[-3]]
+        arraySizes = p.ARRAY
+        if (len(arraySizes) > 0):
+            #el array se inicializa a [0] y al tipo se le añade un [],
+            #pongo esto por poner algo, ya que luego no se va a usar
+            self.Table[self.ambito][1][p.ID] =[[0], p[-4]+p[-3]+"[]"]
+        else:
+            self.Table[self.ambito][1][p.ID] =[0, p[-4]+p[-3]]
+
+    @_('"[" NUMBER "]" ARRAY')
+    def ARRAY(self,p):
+        arraySizes = p.ARRAY
+        arraySizes.append(p.NUMBER)
+        return arraySizes
+
+    @_('')
+    def ARRAY(self,p):
+        return []
+
 
     @_('ID "=" INSTR')
     def ELEM(self,p):
