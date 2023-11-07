@@ -1,0 +1,4 @@
+int main(){
+	int a = 4;
+	printf ( "hola%d y %d", a, 2+2, 3+3);
+}
