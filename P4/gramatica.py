@@ -43,7 +43,7 @@ class UnaryNode():
 
 class CLexer(Lexer):
     
-    tokens = {NUMBER,NUMBERF,CHAR, ID, TYPE, VOIDTYPE, COMPSIMB, ANDSIMB, ORSIMB,MAIN,PRINT, STRING}
+    tokens = {NUMBER,NUMBERF,CHAR, ID, TYPE, VOIDTYPE, COMPSIMB, ANDSIMB, ORSIMB,MAIN,PRINT,SCANF, STRING}
 
     # Ignored characters
     ignore = ' \t'
@@ -51,7 +51,7 @@ class CLexer(Lexer):
     literals = { ';', '(', ')', '=', '<', '>', '!', "+", "-", "*", "/", ',','{','}', '&', '[', ']'}
 
     # Regular expression rules for tokens
-    ID = r'(?!int\b|float\b|char\b|void\b|main\b|printf\b|\[|\])[a-zA-Z_][a-zA-Z0-9_]*'
+    ID = r'(?!int\b|float\b|char\b|void\b|main\b|printf\b|scanf\b|\[|\])[a-zA-Z_][a-zA-Z0-9_]*'
     
     COMPSIMB = r'==|<=|>=|!='
     ORSIMB = r'\|\|'
@@ -61,6 +61,7 @@ class CLexer(Lexer):
     
     MAIN = r'main'
     PRINT= r'printf'
+    SCANF=r'scanf'
 
 
     ignore_newline = r'\n+'
@@ -195,7 +196,29 @@ class CParser(Parser):
     def LINE(self, p):
         return p.DECLAR
         
-
+    @_('SCANF "(" STRING SCANIDS ")"')
+    def LINE(self,p):
+        L=list()
+        L=p.SCANIDS
+        percents=p.STRING.count("%d")
+        vars=len(L)
+        if vars==percents:
+            pass
+            #Algo de x86
+        else:
+            raise Exception("Too many variables in scanf")
+                
+            
+    @_(", '&' ID SCANIDS ")
+    def SCANIDS(self,p):
+        L=[]
+        L.append(p.ID)
+        
+        L += p.SCANIDS
+        return L
+    @_("")
+    def SCANIDS(self,p):
+        return []
     @_('PRINT "(" STRING PRINTIDS ")"')
     def LINE(self, p):
         L=list()
