@@ -100,7 +100,9 @@ class CLexer(Lexer):
 #PARSER
 class CParser(Parser):
     Table=dict()
-    ambito="None"
+    ambito="Global"
+    ebpOffset = 0
+    ebpOffsetArg = 0
 
     def __init__(self):
         self.vars = {}
@@ -126,15 +128,22 @@ class CParser(Parser):
         self.Table[self.ambito]=["int",dict()]
         pass
     
-    @_('S2 FUNCTION')
+    @_('S2 GLOBAL')
     def S2(self,p):
         pass
-
+    @_('S2 ')
+    def S2(self,p):
+        pass
     @_('')
     def S2(self,p):
         pass
-
-    @_('FUNCTYPE ID emptyF1 "(" ARGS ")" "{" LINES "}"')
+    @_('FUNCTION')
+    def GLOBAL(self,p):
+        pass
+    @_('DECLAR')
+    def GLOBAL(self,p):
+        pass
+    @_('FUNCTYPE ID emptyF1 "(" ARGS ")" "{" LINES "}" emptyF2')
     def FUNCTION(self,p):
         pass
 
@@ -161,9 +170,15 @@ class CParser(Parser):
 
     @_('')
     def emptyF1(self,p):
+        self.ebpOffsetArg += 4
         self.ambito=p[-1]
-        self.Table[self.ambito]=[p[-2],dict()]
+        self.Table[self.ambito]=[p[-2],dict(), self.ebpOffsetArg]
         return p[-2]
+    @_('')
+    def emptyF2(self,p):
+        self.ebpOffsetArg += 4
+        self.ambito="Global"
+        pass
 
     @_('')
     def RARGS(self,p):
@@ -171,7 +186,7 @@ class CParser(Parser):
 
     @_('ID')
     def ARG(self,p):
-        self.Table[self.ambito][1][p.ID]=[0,p[-2]]
+        self.Table[self.ambito][1][p.ID]=[0,p[-2], self.ebpOffsetArg]
         return 
 
     
@@ -253,6 +268,7 @@ class CParser(Parser):
     ##
     ## LANGUAJE INSTRUCTIONS
     ##
+   # @_('ID "("    )')
     @_('ASIG')                              #instr = asig
     def INSTR(self,p):
         return p.ASIG
@@ -292,9 +308,10 @@ class CParser(Parser):
         if (len(arraySizes) > 0):
             #el array se inicializa a [0] y al tipo se le añade un [],
             #pongo esto por poner algo, ya que luego no se va a usar
-            self.Table[self.ambito][1][p.ID] =[[0], p[-4]+p[-3]+"[]"]
+            #El ebpoffset esta a 0 porque algo hay que poner, pero no es asi
+            self.Table[self.ambito][1][p.ID] =[[0], p[-4]+p[-3]+"[]", 0]
         else:
-            self.Table[self.ambito][1][p.ID] =[0, p[-4]+p[-3]]
+            self.Table[self.ambito][1][p.ID] =[0, p[-5], self.ebpOffset]
 
     @_('"[" NUMBER "]" ARRAY')
     def ARRAY(self,p):
@@ -321,15 +338,17 @@ class CParser(Parser):
         elif(valueType=='char'): 
             value=chr(value)
             
-        self.Table[self.ambito][1][p.ID]= [value, valueType]
+        self.Table[self.ambito][1][p.ID]= [value, valueType, self.ebpOffset]
 
     #INHERITANCE SIMULATION
     @_('')
     def empty(self, p):
+        self.ebpOffset-=4
         return p[-1]
 
     @_('')
     def empty2(self, p):
+        self.ebpOffset-=4
         return p[-3]
 
 
