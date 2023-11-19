@@ -3,7 +3,7 @@ int fact(int a, int b){
 
 
 int main(){
-	int a, b;
+	int a=4, b;
 	a+2*3/5;
 	fact(a,2);
 	printf("Introduzca un numero:");

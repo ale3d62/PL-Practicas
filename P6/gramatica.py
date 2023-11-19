@@ -47,7 +47,7 @@ class UnaryNode():
 
 class CLexer(Lexer):
     
-    tokens = {NUMBER,NUMBERF,CHAR, ID, TYPE, COMPSIMB, ANDSIMB, ORSIMB,MAIN,PRINT,SCANF, STRING}
+    tokens = {NUMBER,NUMBERF,CHAR, ID, TYPE,VOIDTYPE, COMPSIMB, ANDSIMB, ORSIMB,MAIN,PRINT,SCANF, STRING}
 
     # Ignored characters
     ignore = ' \t'
@@ -60,7 +60,8 @@ class CLexer(Lexer):
     COMPSIMB = r'==|<=|>=|!='
     ORSIMB = r'\|\|'
     ANDSIMB =r'\&\&'
-    TYPE = r'int|float|char|void'
+    TYPE = r'int|float|char'
+    VOIDTYPE = r'void'
     
     MAIN = r'main'
     PRINT= r'printf'
@@ -144,6 +145,23 @@ class CParser(Parser):
     @_('TYPE ID emptyF1 "(" ARGS ")" "{" LINES "}" emptyF2')
     def FUNCTION(self,p):
         pass
+
+    @_('VOIDTYPE ID emptyF1 "(" ARGS ")" "{" LINES "}" emptyF2')
+    def FUNCTION(self,p):
+        pass
+
+    #Esto lo pilla la gramatica sin explotar, pero en realidad detras de ID faltaria "POINTERS empty ", la semantica de añadir a la tabla y todo eso casi que no se puede hacer sin el empty, solo pilla el tipo bien el primer elemento
+    @_('TYPE ID ARRAY REST ";"') #Global declarations
+    def FUNCTION(self,p):
+        arraySizes = p.ARRAY
+        if (len(arraySizes) > 0):
+            #el array se inicializa a [0] y al tipo se le añade un [],
+            #pongo esto por poner algo, ya que luego no se va a usar
+            #El ebpoffset esta a 0 porque algo hay que poner, pero no es asi
+            self.Table[self.ambito][1][p.ID] =[[0], p[-4]+p[-3]+"[]", 0]
+        else:
+            print(p.ID + ": " + str(p[-5]))
+            self.Table[self.ambito][1][p.ID] =[0, p[-5], self.ebpOffset]
 
     @_('TYPE ARG RARGS' )
     def ARGS(self,p):
@@ -332,6 +350,8 @@ class CParser(Parser):
     def REST(self,p):
         pass
 
+        
+    #Esto hay que cambiarlo para que meta los tipos puntero
     @_('ID ARRAY')
     def ELEM(self,p):
         arraySizes = p.ARRAY
@@ -356,7 +376,8 @@ class CParser(Parser):
 
     @_('ID "=" INSTR')
     def ELEM(self,p):
-        valueType = p[-6]+p[-4]
+        #valueType = p[-6]+p[-4] #no se que hacia esto asi pero p[-6] devuelve nonetype y p[-4] el tipo
+        valueType = p[-4]
         value = p.INSTR
         if(valueType=='int'):
             # if(type(value)==str):
