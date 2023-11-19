@@ -19,13 +19,17 @@ class BinaryNode():
         elif(op=='!='):
             self.value = p1 != p2
         elif(op=='+'):
-            self.value = p1 + p2
+           print("movl %eax, %ebx;\npopl %eax;\naddl %ebx,%eax;\npushl %eax\n")
+           self.value=p1+p2
         elif(op=='-'):
-            self.value = p1 - p2
+            print("movl %eax, %ebx;\npopl %eax;\nsubl %ebx,%eax;\npushl %eax\n")
+            self.value=p1-p2
         elif(op=='*'):
-            self.value = p1 * p2
+             print("\nmovl %eax, %ebx;\npopl %eax;\nimmull %ebx,%eax;\npushl %eax\n")
+             self.value=p1*p2
         elif(op=='/'):
-            self.value = p1 / p2
+             self.value=p1/p2
+             print("\nmovl %eax, %ebx;\npopl %eax;\ncdq;\nsubl idivl %ebx;\npushl %eax\n")
         elif(op=='asig'):
             p1.value = p2
 
@@ -203,17 +207,19 @@ class CParser(Parser):
         L=p.SCANIDS
         percents=p.STRING.count("%d")
         vars=len(L)
+        print("pushl "+p.STRING)
+        print("Call scanf;")
+        print("addl $"+str((vars+1)*4)+",%esp;")
         if vars==percents:
-            pass
-            #Algo de x86
+           pass
         else:
             raise Exception("Too many variables in scanf")
                 
             
-    @_(", '&' ID SCANIDS ")
+    @_(", REFERENCE SCANIDS ")
     def SCANIDS(self,p):
         L=[]
-        L.append(p.ID)
+        L.append(p.REFERENCE)
         
         L += p.SCANIDS
         return L
@@ -236,7 +242,9 @@ class CParser(Parser):
             s=p.STRING
             for var in L:
                 s = s.replace("%d",str(var),1)
-            print(s)
+            print("pushl "+p.STRING)
+            print("Call printf")
+            print("addl $"+str((vars+1)*4)+",%esp")
     
     
     @_('"," INSTR PRINTIDS')
@@ -262,10 +270,46 @@ class CParser(Parser):
     @_('OROP')                              #instr = orOp
     def INSTR(self,p):
         return p.OROP
+    @_('FCALL')
+    def INSTR(self,p):
+        pass
+    @_('ID "(" FARGS ")"')
+    def FCALL(self,p):
+        L=(p.FARGS)
+        if(len(L)==len(self.Table[p.ID][1])):
+            print("Call "+p.ID+"\n")
+            print("addl $"+str(len(L)*4)+",%esp")
+        
+        pass
+    @_('FARG RFARGS' )
+    def FARGS(self,p):
+        L=[]
+        L.append(p.FARG)      
+        L += p.RFARGS
+        return L
     
+    @_('')
+    def FARGS(self,p):
+        pass
+
+    @_('"," FARG RFARGS')
+    def RFARGS(self,p):
+        L=[]
+        L.append(p.FARG)
+        
+        L += p.RFARGS
+        return L
+        
+    @_('')
+    def RFARGS(self,p):
+        return []
+    @_('VAL')
+    def FARG(self,p):
+        return p.VAL  
     #DECLARATIONS
     @_('TYPE POINTERS IDPRIMA')
     def DECLAR(self,p):
+        print("subl $"+str(-1*self.ebpOffset)+", %esp")
         pass
 
     @_('"*" POINTERS')
@@ -297,7 +341,7 @@ class CParser(Parser):
             #El ebpoffset esta a 0 porque algo hay que poner, pero no es asi
             self.Table[self.ambito][1][p.ID] =[[0], p[-4]+p[-3]+"[]", 0]
         else:
-            self.Table[self.ambito][1][p.ID] =[0, p[-5], self.ebpOffset]
+            self.Table[self.ambito][1][p.ID] =[0, p[-3], self.ebpOffset]
 
     @_('"[" NUMBER "]" ARRAY')
     def ARRAY(self,p):
@@ -330,7 +374,8 @@ class CParser(Parser):
     @_('')
     def empty(self, p):
         self.ebpOffset-=4
-        return p[-1]
+        
+        return p[-2]
 
     @_('')
     def empty2(self, p):
@@ -418,26 +463,31 @@ class CParser(Parser):
 
     @_('ADDOP "+" PRODOP')                  #addOp = addOp + prodOp
     def ADDOP(self,p):
+        pass
         return BinaryNode('+', p.ADDOP, p.PRODOP).value
         #return p.ADDOP + p.PRODOP
 
     @_('ADDOP "-" PRODOP')                  #addOp = addOp - prodOp
     def ADDOP(self,p):
+        pass
         return BinaryNode('-', p.ADDOP, p.PRODOP).value
         #return p.ADDOP-p.PRODOP
 
     @_('PRODOP')                            #addOp = prodOp
     def ADDOP(self,p):
+        pass
         return p.PRODOP
 
 
     @_('PRODOP "*" PAROP')                  #prodOp = prodOp * parOp
     def PRODOP(self,p):
+        pass
         return BinaryNode('*', p.PRODOP, p.PAROP).value
         #return p.PRODOP * p.PAROP
 
     @_('PRODOP "/" PAROP')                  #prodOp = prodOp / parOp
     def PRODOP(self,p):
+        pass
         return BinaryNode('/', p.PRODOP, p.PAROP).value
         #return p.PRODOP / p.PAROP
         
@@ -462,6 +512,7 @@ class CParser(Parser):
 
     @_('NUMBER')                            #val = NUMBER
     def VAL(self,p):
+        print("movl $("+str(p.NUMBER)+"), %eax;\npushl %eax")
         return p.NUMBER
 
     @_('NUMBERF')                            #val = NUMBERF
@@ -475,13 +526,17 @@ class CParser(Parser):
     @_('ID')                                #val = ID
     def VAL(self,p):
         try:
-            return self.Table[self.ambito][1][p.ID][0]
+            print("movl "+str(+self.Table[self.ambito][1][p.ID][2])+"(%ebp),%eax;\npushl %eax;")
+            return self.Table[self.ambito][1][p.ID][2]
         except:
             raise Exception("Variable '"+p.ID+"' undefined") 
-            
-    @_('"&" ID')
+    @_('REFERENCE')
     def VAL(self,p):
+        pass       
+    @_('"&" ID')
+    def REFERENCE(self,p):
         try:
+            print("leal "+str(self.Table[self.ambito][1][p.ID][2])+"(%ebp),%eax;\npushl %eax;\n")
             return p.ID
         except:
             raise Exception("Variable '"+p.ID+"' undefined") 

@@ -3,8 +3,12 @@ int fact(int a, int b){
 
 
 int main(){
-	int a, c, d;
+	int a, b;
+	a+2*3/5;
+	fact(a,2);
+	printf("Introduzca un numero:");
 	scanf("%d",&a);
+	printf("Numero introducido %d",a);
 
 }
 
