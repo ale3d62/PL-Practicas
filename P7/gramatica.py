@@ -19,18 +19,38 @@ class BinaryNode():
         elif(op=='!='):
             self.value = p1 != p2
         elif(op=='+'):
-            
-           print(p1+"\npushl %eax;\n"+p2+"\nmovl %eax, %ebx;\npopl %eax;\naddl %ebx,%eax;\n")
-           self.value="movl %eax, %ebx;\n"
+            if p1=="":
+                print(p1+"\npushl %eax;\n"+p2+"\nmovl %eax, %ebx;\npopl %eax;\naddl %ebx,%eax;\n")
+                self.value=""
+            else:
+                 print(p2+"\npushl %eax;\n"+p1+"\nmovl %eax, %ebx;\npopl %eax;\naddl %ebx,%eax;\n")
+                 self.value=""
+
         elif(op=='-'):
-            print(p1+"\npushl %eax\n"+p2+"movl %eax, %ebx;\npopl %eax;\nsubl %ebx,%eax;\n")
-            self.value="movl %eax, %ebx;\n"
+            if p1=="":
+                print(p1+"\npushl %eax\n"+p2+"movl %eax, %ebx;\npopl %eax;\nsubl %ebx,%eax;\n")
+                self.value=""
+            else:
+                print(p2+"\npushl %eax;\n"+p1+"\nmovl %eax, %ebx;\npopl %eax;\nsubl %ebx,%eax;\n")
+                self.value=""
+
         elif(op=='*'):
-             print(p1+"\npush %eax;\n"+p2+"<\nmovl %eax,%ebx;\npopl %eax\nimmull %ebx,%eax;")
-             self.value=""
+            if p1=="":
+                print(p1+"\npush %eax;\n"+p2+"\nmovl %eax,%ebx;\npopl %eax\nimmull %ebx,%eax;")
+                self.value=""
+            else:
+                print(p2+"\npush %eax;\n"+p1+"\nmovl %eax,%ebx;\npopl %eax\nimmull %ebx,%eax;")
+                self.value=""
+
+
         elif(op=='/'):
-             print(p1+"\npush %eax\n"+p2+"\nmovl %eax,%ebx\npopl %eax\ncdq;\nsubl idivl %ebx;")
-             self.value=""
+            if p1=="":
+                print(p1+"\npush %eax\n"+p2+"\nmovl %eax,%ebx\npopl %eax\ncdq;\nsubl idivl %ebx;")
+                self.value=""
+            else:
+                print("push %eax\n"+p2+"\nmovl %eax,%ebx\npopl %eax\ncdq;\nsubl idivl %ebx;")
+                self.value=""
+
         elif(op=='asig'):
             p1.value = p2
 
