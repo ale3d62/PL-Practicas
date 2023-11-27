@@ -126,7 +126,7 @@ class CLexer(Lexer):
 class CParser(Parser):
     Table=dict()
     GlobalTable={}
-    ambito="0" #0 indicates global ambito
+    ambito="0" #0 indicates global scope
     ebpOffset = 0
     ebpOffsetArg = 0
 
@@ -420,15 +420,24 @@ class CParser(Parser):
     def ELEM(self,p):
         arraySizes = p.ARRAY
         if (len(arraySizes) > 0):
-            #el array se inicializa a [0] y al tipo se le añade un [],
+            #el array se inicializa a [0] y al tipo se le añade un [] por dimension,
             #pongo esto por poner algo, ya que luego no se va a usar
-            #El ebpoffset esta a 0 porque algo hay que poner, pero no es asi
-            self.Table[self.ambito][1][p.ID] =[[0], p[-4]+p[-3]+"[]", 0]
+            arrayElements = 1
+            for dim in arraySizes:
+                arrayElements *= dim
+
+            #Adjust ebpOffset (4 per array element, -4 that an element already takes)
+            self.ebpOffset -= ((4*arrayElements)-4)
+
+            self.Table[self.ambito][1][p.ID] =[[0], p[-4]+p[-3]+("[]"*len(arraySizes)), self.ebpOffset]
         else:
+            pointerType = ""
+            if("*" in p[-4]):
+                pointerType = p[-4]
             try:
-                self.Table[self.ambito][1][p.ID] =[0, p[-3], self.ebpOffset]
+                self.Table[self.ambito][1][p.ID] =[0, p[-3]+pointerType, self.ebpOffset]
             except (KeyError):
-                self.GlobalTable[p.ID] =[0, p[-3], self.ebpOffset]
+                self.GlobalTable[p.ID] =[0, p[-3]+pointerType, self.ebpOffset]
 
     @_('"[" NUMBER "]" ARRAY')
     def ARRAY(self,p):
