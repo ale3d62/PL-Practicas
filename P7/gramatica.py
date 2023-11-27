@@ -238,7 +238,7 @@ class CParser(Parser):
     def emptyF1(self,p):
         self.ebpOffsetArg += 4
         self.ambito=p[-1]
-        self.Table[self.ambito]=[p[-2],dict(), self.ebpOffsetArg]
+        self.Table[self.ambito]=[p[-2], dict(), self.ebpOffsetArg]
         return p[-2]
         
     @_('')
@@ -254,9 +254,9 @@ class CParser(Parser):
     @_('ID')
     def ARG(self,p):
         try:
-            self.Table[self.ambito][1][p.ID]=[0,p[-2], self.ebpOffsetArg]
+            self.Table[self.ambito][1][p.ID]=[p[-2], self.ebpOffsetArg]
         except (KeyError):
-            self.GlobalTable[p.ID] = [0,p[-2], self.ebpOffsetArg]
+            self.GlobalTable[p.ID] = [p[-2], self.ebpOffsetArg]
         return 
 
     
@@ -352,17 +352,22 @@ class CParser(Parser):
     @_('OROP')                              #instr = orOp
     def INSTR(self,p):
         return p.OROP
+        
     @_('FCALL')
     def INSTR(self,p):
         pass
+
     @_('ID "(" FARGS ")"')
     def FCALL(self,p):
         L=(p.FARGS)
-        if(len(L)==len(self.Table[p.ID][1])):
+        if(not L):
+            if(len(self.Table[p.ID][1]) == 0):
+                print("Call "+p.ID+"\n")
+        elif(len(L)==len(self.Table[p.ID][1])):
             print("Call "+p.ID+"\n")
             print("addl $"+str(len(L)*4)+",%esp")
-        
         pass
+
     @_('FARG RFARGS' )
     def FARGS(self,p):
         L=[]
@@ -420,8 +425,6 @@ class CParser(Parser):
     def ELEM(self,p):
         arraySizes = p.ARRAY
         if (len(arraySizes) > 0):
-            #el array se inicializa a [0] y al tipo se le añade un [] por dimension,
-            #pongo esto por poner algo, ya que luego no se va a usar
             arrayElements = 1
             for dim in arraySizes:
                 arrayElements *= dim
@@ -429,15 +432,15 @@ class CParser(Parser):
             #Adjust ebpOffset (4 per array element, -4 that an element already takes)
             self.ebpOffset -= ((4*arrayElements)-4)
 
-            self.Table[self.ambito][1][p.ID] =[[0], p[-4]+p[-3]+("[]"*len(arraySizes)), self.ebpOffset]
+            self.Table[self.ambito][1][p.ID] =[p[-4]+p[-3]+("[]"*len(arraySizes)), self.ebpOffset]
         else:
             pointerType = ""
             if("*" in p[-4]):
                 pointerType = p[-4]
             try:
-                self.Table[self.ambito][1][p.ID] =[0, p[-3]+pointerType, self.ebpOffset]
+                self.Table[self.ambito][1][p.ID] =[p[-3]+pointerType, self.ebpOffset]
             except (KeyError):
-                self.GlobalTable[p.ID] =[0, p[-3]+pointerType, self.ebpOffset]
+                self.GlobalTable[p.ID] =[p[-3]+pointerType, self.ebpOffset]
 
     @_('"[" NUMBER "]" ARRAY')
     def ARRAY(self,p):
@@ -454,22 +457,11 @@ class CParser(Parser):
     def ELEM(self,p):
         #valueType = p[-6]+p[-4] #no se que hacia esto asi pero p[-6] devuelve nonetype y p[-4] el tipo
         valueType = p[-4]
-        value = p.INSTR
-        """
-        if(valueType=='int'):
-            # if(type(value)==str):
-            #     value = ord(value)
-            # else:
-            value = int(value)
-        elif(valueType=='float'): 
-            value = float(value)
-        elif(valueType=='char'): 
-            value=chr(value)
-        """
+
         try:
-            self.Table[self.ambito][1][p.ID]= [value, valueType, self.ebpOffset]
+            self.Table[self.ambito][1][p.ID]= [valueType, self.ebpOffset]
         except (KeyError):
-            self.GlobalTable[p.ID] = [value, valueType, self.ebpOffset]
+            self.GlobalTable[p.ID] = [valueType, self.ebpOffset]
 
     #INHERITANCE SIMULATION
     @_('')
@@ -488,25 +480,11 @@ class CParser(Parser):
 
     @_('ID "=" INSTR')                 #asig = ID '=' instr
     def ASIG(self,p):
-        try:
-            type = self.Table[self.ambito][1][p.ID][1]
-            value = p.INSTR
-            if(type=='int'):
-                #if(type(value)==str):
-                #    value = ord(value)
-                #else:
-                value = int(value)
-            elif(type=='float'): 
-                value = float(value)
-            elif(type=='char'): 
-                value=chr(value)
-                
-            self.Table[self.ambito][1][p.ID][0] = value
-            return self.Table[self.ambito][1][p.ID][0]
-        except (KeyError):
-            self.GlobalTable[p.ID][0] = value
-            return self.GlobalTable[p.ID][0]
-        except:
+        if p.ID in self.Table[self.ambito][1]:
+            return p.INSTR
+        elif p.ID in  self.GlobalTable:
+            return p.INSTR
+        else:
             raise Exception("Variable '"+p.ID+"' undefined")
 
 
@@ -616,7 +594,7 @@ class CParser(Parser):
 
     @_('NUMBER')                            #val = NUMBER
     def VAL(self,p):
-       # print("movl $("+str(p.NUMBER)+"), %eax;\npushl %eax")
+        print("movl $("+str(p.NUMBER)+"), %eax;\npushl %eax")
         return "movl $("+str(p.NUMBER)+"), %eax;"
 
     @_('NUMBERF')                            #val = NUMBERF
@@ -630,8 +608,9 @@ class CParser(Parser):
     @_('ID')                                #val = ID
     def VAL(self,p):
         try:
-            #print("movl "+str(+self.Table[self.ambito][1][p.ID][2])+"(%ebp),%eax;\npushl %eax;")
-            return "movl "+str(+self.Table[self.ambito][1][p.ID][2])+"(%ebp),%eax;"
+            print("movl "+str(+self.Table[self.ambito][1][p.ID][1])+"(%ebp),%eax;")
+            print("pushl %eax;\n")
+            return "movl "+str(+self.Table[self.ambito][1][p.ID][1])+"(%ebp),%eax;"
         except:
             raise Exception("Variable '"+p.ID+"' undefined") 
     @_('REFERENCE')
@@ -640,8 +619,9 @@ class CParser(Parser):
     @_('"&" ID')
     def REFERENCE(self,p):
         try:
-            #print("leal "+str(self.Table[self.ambito][1][p.ID][2])+"(%ebp),%eax;\npushl %eax;\n")
-            return "leal "+str(self.Table[self.ambito][1][p.ID][2])+"(%ebp),%eax;\n"
+            print("leal "+str(self.Table[self.ambito][1][p.ID][1])+"(%ebp),%eax;")
+            print("pushl %eax\n")
+            return "leal "+str(self.Table[self.ambito][1][p.ID][1])+"(%ebp),%eax;\n"
         except:
             raise Exception("Variable '"+p.ID+"' undefined") 
         
@@ -663,8 +643,6 @@ if __name__ == '__main__':
     print("")
 
     result = parser.parse(lexer.tokenize(text))
-    print(result)
     print(parser.Table)
     #except Exception as e:
     #    print("[ERROR] " + str(e))
-
