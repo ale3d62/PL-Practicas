@@ -1,11 +1,9 @@
-int a,b;
+int fact(int &p){
+
+}
 
 int main(){
     int a = 1;
-    int b = 0;
-    if(a&&b){
-
-    }
-    else{};
+    int b = fact(*a);
 }
 

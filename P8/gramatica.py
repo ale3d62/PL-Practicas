@@ -227,6 +227,18 @@ class CParser(Parser):
     def FUNCTION(self,p):
         pass
 
+    @_('')
+    def emptyF1(self,p):
+        self.ebpOffsetArg += 4
+        self.ambito=p[-1]
+        self.Table[self.ambito]=[p[-2], dict(), self.ebpOffsetArg]
+        return p[-2]
+        
+    @_('')
+    def emptyF2(self,p):
+        self.ebpOffsetArg += 4
+        self.ambito = "0"
+        pass
 
 
     #--Global declarations--
@@ -265,7 +277,7 @@ class CParser(Parser):
 
     
 
-    @_('TYPE ARG RARGS' )
+    @_('TYPE REF ARG RARGS' )
     def ARGS(self,p):
         pass
     
@@ -274,26 +286,24 @@ class CParser(Parser):
     def ARGS(self,p):
         pass
 
-    @_('"," TYPE ARG RARGS')
+    @_('"," TYPE REF ARG RARGS')
     def RARGS(self,p):
-        pass
-
-    @_('')
-    def emptyF1(self,p):
-        self.ebpOffsetArg += 4
-        self.ambito=p[-1]
-        self.Table[self.ambito]=[p[-2], dict(), self.ebpOffsetArg]
-        return p[-2]
-        
-    @_('')
-    def emptyF2(self,p):
-        self.ebpOffsetArg += 4
-        self.ambito = "0"
         pass
 
     @_('')
     def RARGS(self,p):
         pass
+
+    # Para aceptar paso por referencia (aceptar, de semantica ni idea) ver si se
+    # puede reutilizar la regla REFERENCES de mas abajo
+    @_('"&" REF')
+    def REF(self,p):
+        pass
+
+    @_('')
+    def REF(self,p):
+        pass
+
 
     @_('ID')
     def ARG(self,p):
@@ -457,6 +467,10 @@ class CParser(Parser):
     @_('VAL')
     def FARG(self,p):
         return p.VAL  
+
+    @_('POINTERS ID') #Para paso por referencia, el valor a devolver no es p.ID
+    def FARG(self,p):
+        return p.ID
 
     #DECLARATIONS
     @_('TYPE POINTERS IDPRIMA')
