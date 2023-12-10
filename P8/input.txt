@@ -1,9 +1,12 @@
-int fact(int &p){
+int fact(int p){
 
 }
 
 int main(){
-    int a = 1;
-    int b = fact(*a);
+    int* a = 1;
+    if(a<=1 && a>=1){
+    int b = fact(&a);}
+    else{a=2;};
+	
 }
 

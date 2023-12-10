@@ -277,7 +277,7 @@ class CParser(Parser):
 
     
 
-    @_('TYPE REF ARG RARGS' )
+    @_('TYPE ARG RARGS' )
     def ARGS(self,p):
         pass
     
@@ -286,22 +286,12 @@ class CParser(Parser):
     def ARGS(self,p):
         pass
 
-    @_('"," TYPE REF ARG RARGS')
+    @_('"," TYPE ARG RARGS')
     def RARGS(self,p):
         pass
 
     @_('')
     def RARGS(self,p):
-        pass
-
-    # Para aceptar paso por referencia (aceptar, de semantica ni idea) ver si se
-    # puede reutilizar la regla REFERENCES de mas abajo
-    @_('"&" REF')
-    def REF(self,p):
-        pass
-
-    @_('')
-    def REF(self,p):
         pass
 
 
@@ -399,17 +389,23 @@ class CParser(Parser):
 
     #if statements must use {} and end with ";". if there is an else, the 
     #";" must be after the else, not the if
-    @_('IF "(" OROP ")" "{" LINES "}" ELSERULE')
+    @_('IF "(" OROP ")" emptyif "{" LINES "}" ELSERULE')
     def LINE(self,p):
-        pass
-
-    @_('ELSE "{" LINES "}"')
+        print("final:")
+    @_('')
+    def emptyif(self,p):
+        print("jne false")
+    @_('ELSE emptyelse "{" LINES "}"')
     def ELSERULE(self,p):
         pass
-
+    @_('')
+    def emptyelse(self,p):
+        print("jmp final")
+        print("false:")    
     @_('')
     def ELSERULE(self,p):
-        pass
+        print("false:")
+        print("jmp final;")
 
 
 
@@ -468,7 +464,7 @@ class CParser(Parser):
     def FARG(self,p):
         return p.VAL  
 
-    @_('POINTERS ID') #Para paso por referencia, el valor a devolver no es p.ID
+    @_('"*" POINTERS ID') #Para paso por referencia, el valor a devolver no es p.ID
     def FARG(self,p):
         return p.ID
 
