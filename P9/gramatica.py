@@ -199,16 +199,28 @@ class CParser(Parser):
     ##
     @_('S2 TYPE emptymain MAIN "(" ")" "{" LINES "}"')
     def S(self,p):
+        #main epilogue
+        print("movl %ebp %esp   #EPILOGUE")
+        print("popl %ebp")
+        print("ret\n")
         pass
 
     @_("")
     def emptymain(self,p):
         self.ambito="main"
         self.Table[self.ambito]=["int",dict()]
+        #prologue
+        print("pushl %ebp   #PROLOGUE")
+        print("movl %esp, %ebp")
+        print("subl $4, %esp\n")
         pass
         
     @_('S2 FUNCTION')
     def S2(self,p):
+        #function epilogue
+        print("movl %ebp %esp   #EPILOGUE")
+        print("popl %ebp")
+        print("ret\n")
         pass
 
     @_('S2 GLOBALDECLAR')
@@ -235,6 +247,10 @@ class CParser(Parser):
 
     @_('')
     def emptyF1(self,p):
+        #function prologue
+        print("pushl %ebp   #PROLOGUE")
+        print("movl %esp, %ebp")
+        print("subl $4, %esp\n")
         self.ebpOffsetArg += 4
         self.ambito=p[-1]
         self.Table[self.ambito]=[p[-2], dict(), self.ebpOffsetArg]
