@@ -1,0 +1,2558 @@
+Grammar:
+
+Rule 0     S' -> S
+Rule 1     S -> S2 TYPE emptymain MAIN ( ) { LINES }
+Rule 2     emptymain -> <empty>
+Rule 3     S2 -> <empty>
+Rule 4     S2 -> S2 GLOBALASIG
+Rule 5     S2 -> S2 GLOBALDECLAR
+Rule 6     S2 -> S2 FUNCTION
+Rule 7     FUNCTION -> VOIDTYPE ID emptyF1 ( ARGS ) { LINES } emptyF2
+Rule 8     FUNCTION -> TYPE ID emptyF1 ( ARGS ) { LINES } emptyF2
+Rule 9     emptyF1 -> <empty>
+Rule 10    emptyF2 -> <empty>
+Rule 11    GLOBALDECLAR -> TYPE ELEM emptyglobal emptyaux RESTGLOBAL ;
+Rule 12    RESTGLOBAL -> <empty>
+Rule 13    RESTGLOBAL -> , emptyglobal2 ELEM RESTGLOBAL
+Rule 14    emptyglobal -> <empty>
+Rule 15    emptyglobal2 -> <empty>
+Rule 16    emptyaux -> <empty>
+Rule 17    GLOBALASIG -> ID = INSTR ;
+Rule 18    ARGS -> <empty>
+Rule 19    ARGS -> TYPE REF ARG RARGS
+Rule 20    RARGS -> <empty>
+Rule 21    RARGS -> , TYPE REF ARG RARGS
+Rule 22    REF -> <empty>
+Rule 23    REF -> * REF
+Rule 24    ARG -> ID
+Rule 25    LINES -> <empty>
+Rule 26    LINES -> LINES LINE ;
+Rule 27    LINE -> WHILE ( OROP ) { LINES }
+Rule 28    LINE -> IF ( OROP ) emptyif { LINES } ELSERULE
+Rule 29    LINE -> PRINT ( STRING PRINTIDS )
+Rule 30    LINE -> SCANF ( STRING SCANIDS )
+Rule 31    LINE -> DECLAR
+Rule 32    LINE -> INSTR
+Rule 33    SCANIDS -> <empty>
+Rule 34    SCANIDS -> , REFERENCE SCANIDS
+Rule 35    PRINTIDS -> <empty>
+Rule 36    PRINTIDS -> , INSTR PRINTIDS
+Rule 37    emptyif -> <empty>
+Rule 38    ELSERULE -> <empty>
+Rule 39    ELSERULE -> ELSE emptyelse { LINES }
+Rule 40    emptyelse -> <empty>
+Rule 41    INSTR -> FCALL
+Rule 42    INSTR -> OROP
+Rule 43    INSTR -> ASIG
+Rule 44    FCALL -> ID ( FARGS )
+Rule 45    FARGS -> <empty>
+Rule 46    FARGS -> FARG RFARGS
+Rule 47    RFARGS -> <empty>
+Rule 48    RFARGS -> , FARG RFARGS
+Rule 49    FARG -> VAL
+Rule 50    DECLAR -> TYPE POINTERS IDPRIMA
+Rule 51    POINTERS -> <empty>
+Rule 52    POINTERS -> * POINTERS
+Rule 53    IDPRIMA -> empty ELEM REST
+Rule 54    REST -> <empty>
+Rule 55    REST -> , empty2 ELEM REST
+Rule 56    ELEM -> ID = INSTR
+Rule 57    ELEM -> ID ARRAY
+Rule 58    ARRAY -> <empty>
+Rule 59    ARRAY -> [ NUMBER ] ARRAY
+Rule 60    empty -> <empty>
+Rule 61    empty2 -> <empty>
+Rule 62    ASIG -> ID = INSTR
+Rule 63    OROP -> ANDOP
+Rule 64    OROP -> OROP ORSIMB ANDOP
+Rule 65    ANDOP -> NOTOP
+Rule 66    ANDOP -> ANDOP ANDSIMB NOTOP
+Rule 67    NOTOP -> COMPOP
+Rule 68    NOTOP -> ! NOTOP
+Rule 69    COMPOP -> ADDOP
+Rule 70    COMPOP -> COMPOP COMPSIMB ADDOP
+Rule 71    ADDOP -> PRODOP
+Rule 72    ADDOP -> ADDOP - PRODOP
+Rule 73    ADDOP -> ADDOP + PRODOP
+Rule 74    PRODOP -> PAROP
+Rule 75    PRODOP -> PRODOP / PAROP
+Rule 76    PRODOP -> PRODOP * PAROP
+Rule 77    PAROP -> VAL
+Rule 78    PAROP -> ( OROP )
+Rule 79    VAL -> REFERENCE
+Rule 80    VAL -> ID
+Rule 81    VAL -> CHAR
+Rule 82    VAL -> NUMBERF
+Rule 83    VAL -> NUMBER
+Rule 84    REFERENCE -> & ID
+
+Terminals, with rules where they appear:
+
+!                    : 68
+&                    : 84
+(                    : 1 7 8 27 28 29 30 44 78
+)                    : 1 7 8 27 28 29 30 44 78
+*                    : 23 52 76
++                    : 73
+,                    : 13 21 34 36 48 55
+-                    : 72
+/                    : 75
+;                    : 11 17 26
+=                    : 17 56 62
+ANDSIMB              : 66
+CHAR                 : 81
+COMPSIMB             : 70
+ELSE                 : 39
+ID                   : 7 8 17 24 44 56 57 62 80 84
+IF                   : 28
+MAIN                 : 1
+NUMBER               : 59 83
+NUMBERF              : 82
+ORSIMB               : 64
+PRINT                : 29
+SCANF                : 30
+STRING               : 29 30
+TYPE                 : 1 8 11 19 21 50
+VOIDTYPE             : 7
+WHILE                : 27
+[                    : 59
+]                    : 59
+error                : 
+{                    : 1 7 8 27 28 39
+}                    : 1 7 8 27 28 39
+
+Nonterminals, with rules where they appear:
+
+ADDOP                : 69 70 72 73
+ANDOP                : 63 64 66
+ARG                  : 19 21
+ARGS                 : 7 8
+ARRAY                : 57 59
+ASIG                 : 43
+COMPOP               : 67 70
+DECLAR               : 31
+ELEM                 : 11 13 53 55
+ELSERULE             : 28
+FARG                 : 46 48
+FARGS                : 44
+FCALL                : 41
+FUNCTION             : 6
+GLOBALASIG           : 4
+GLOBALDECLAR         : 5
+IDPRIMA              : 50
+INSTR                : 17 32 36 56 62
+LINE                 : 26
+LINES                : 1 7 8 26 27 28 39
+NOTOP                : 65 66 68
+OROP                 : 27 28 42 64 78
+PAROP                : 74 75 76
+POINTERS             : 50 52
+PRINTIDS             : 29 36
+PRODOP               : 71 72 73 75 76
+RARGS                : 19 21
+REF                  : 19 21 23
+REFERENCE            : 34 79
+REST                 : 53 55
+RESTGLOBAL           : 11 13
+RFARGS               : 46 48
+S                    : 0
+S2                   : 1 4 5 6
+SCANIDS              : 30 34
+VAL                  : 49 77
+empty                : 53
+empty2               : 55
+emptyF1              : 7 8
+emptyF2              : 7 8
+emptyaux             : 11
+emptyelse            : 39
+emptyglobal          : 11
+emptyglobal2         : 13
+emptyif              : 28
+emptymain            : 1
+
+
+state 0
+
+    (0) S' -> . S
+    (1) S -> . S2 TYPE emptymain MAIN ( ) { LINES }
+    (3) S2 -> .
+    (4) S2 -> . S2 GLOBALASIG
+    (5) S2 -> . S2 GLOBALDECLAR
+    (6) S2 -> . S2 FUNCTION
+    TYPE            reduce using rule 3 (S2 -> .)
+    ID              reduce using rule 3 (S2 -> .)
+    VOIDTYPE        reduce using rule 3 (S2 -> .)
+
+    S                              shift and go to state 1
+    S2                             shift and go to state 2
+
+state 1
+
+    (0) S' -> S .
+
+
+state 2
+
+    (1) S -> S2 . TYPE emptymain MAIN ( ) { LINES }
+    (4) S2 -> S2 . GLOBALASIG
+    (5) S2 -> S2 . GLOBALDECLAR
+    (6) S2 -> S2 . FUNCTION
+    (17) GLOBALASIG -> . ID = INSTR ;
+    (11) GLOBALDECLAR -> . TYPE ELEM emptyglobal emptyaux RESTGLOBAL ;
+    (7) FUNCTION -> . VOIDTYPE ID emptyF1 ( ARGS ) { LINES } emptyF2
+    (8) FUNCTION -> . TYPE ID emptyF1 ( ARGS ) { LINES } emptyF2
+    TYPE            shift and go to state 3
+    ID              shift and go to state 7
+    VOIDTYPE        shift and go to state 8
+
+    GLOBALASIG                     shift and go to state 4
+    GLOBALDECLAR                   shift and go to state 5
+    FUNCTION                       shift and go to state 6
+
+state 3
+
+    (1) S -> S2 TYPE . emptymain MAIN ( ) { LINES }
+    (11) GLOBALDECLAR -> TYPE . ELEM emptyglobal emptyaux RESTGLOBAL ;
+    (8) FUNCTION -> TYPE . ID emptyF1 ( ARGS ) { LINES } emptyF2
+    (2) emptymain -> .
+    (56) ELEM -> . ID = INSTR
+    (57) ELEM -> . ID ARRAY
+    ID              shift and go to state 11
+    MAIN            reduce using rule 2 (emptymain -> .)
+
+    emptymain                      shift and go to state 9
+    ELEM                           shift and go to state 10
+
+state 4
+
+    (4) S2 -> S2 GLOBALASIG .
+    TYPE            reduce using rule 4 (S2 -> S2 GLOBALASIG .)
+    ID              reduce using rule 4 (S2 -> S2 GLOBALASIG .)
+    VOIDTYPE        reduce using rule 4 (S2 -> S2 GLOBALASIG .)
+
+
+state 5
+
+    (5) S2 -> S2 GLOBALDECLAR .
+    TYPE            reduce using rule 5 (S2 -> S2 GLOBALDECLAR .)
+    ID              reduce using rule 5 (S2 -> S2 GLOBALDECLAR .)
+    VOIDTYPE        reduce using rule 5 (S2 -> S2 GLOBALDECLAR .)
+
+
+state 6
+
+    (6) S2 -> S2 FUNCTION .
+    TYPE            reduce using rule 6 (S2 -> S2 FUNCTION .)
+    ID              reduce using rule 6 (S2 -> S2 FUNCTION .)
+    VOIDTYPE        reduce using rule 6 (S2 -> S2 FUNCTION .)
+
+
+state 7
+
+    (17) GLOBALASIG -> ID . = INSTR ;
+    =               shift and go to state 12
+
+
+state 8
+
+    (7) FUNCTION -> VOIDTYPE . ID emptyF1 ( ARGS ) { LINES } emptyF2
+    ID              shift and go to state 13
+
+
+state 9
+
+    (1) S -> S2 TYPE emptymain . MAIN ( ) { LINES }
+    MAIN            shift and go to state 14
+
+
+state 10
+
+    (11) GLOBALDECLAR -> TYPE ELEM . emptyglobal emptyaux RESTGLOBAL ;
+    (14) emptyglobal -> .
+    ,               reduce using rule 14 (emptyglobal -> .)
+    ;               reduce using rule 14 (emptyglobal -> .)
+
+    emptyglobal                    shift and go to state 15
+
+state 11
+
+    (8) FUNCTION -> TYPE ID . emptyF1 ( ARGS ) { LINES } emptyF2
+    (56) ELEM -> ID . = INSTR
+    (57) ELEM -> ID . ARRAY
+    (9) emptyF1 -> .
+    (58) ARRAY -> .
+    (59) ARRAY -> . [ NUMBER ] ARRAY
+    =               shift and go to state 17
+    (               reduce using rule 9 (emptyF1 -> .)
+    ,               reduce using rule 58 (ARRAY -> .)
+    ;               reduce using rule 58 (ARRAY -> .)
+    [               shift and go to state 19
+
+    emptyF1                        shift and go to state 16
+    ARRAY                          shift and go to state 18
+
+state 12
+
+    (17) GLOBALASIG -> ID = . INSTR ;
+    (41) INSTR -> . FCALL
+    (42) INSTR -> . OROP
+    (43) INSTR -> . ASIG
+    (44) FCALL -> . ID ( FARGS )
+    (63) OROP -> . ANDOP
+    (64) OROP -> . OROP ORSIMB ANDOP
+    (62) ASIG -> . ID = INSTR
+    (65) ANDOP -> . NOTOP
+    (66) ANDOP -> . ANDOP ANDSIMB NOTOP
+    (67) NOTOP -> . COMPOP
+    (68) NOTOP -> . ! NOTOP
+    (69) COMPOP -> . ADDOP
+    (70) COMPOP -> . COMPOP COMPSIMB ADDOP
+    (71) ADDOP -> . PRODOP
+    (72) ADDOP -> . ADDOP - PRODOP
+    (73) ADDOP -> . ADDOP + PRODOP
+    (74) PRODOP -> . PAROP
+    (75) PRODOP -> . PRODOP / PAROP
+    (76) PRODOP -> . PRODOP * PAROP
+    (77) PAROP -> . VAL
+    (78) PAROP -> . ( OROP )
+    (79) VAL -> . REFERENCE
+    (80) VAL -> . ID
+    (81) VAL -> . CHAR
+    (82) VAL -> . NUMBERF
+    (83) VAL -> . NUMBER
+    (84) REFERENCE -> . & ID
+    ID              shift and go to state 20
+    !               shift and go to state 29
+    (               shift and go to state 25
+    CHAR            shift and go to state 35
+    NUMBERF         shift and go to state 36
+    NUMBER          shift and go to state 37
+    &               shift and go to state 38
+
+    INSTR                          shift and go to state 21
+    FCALL                          shift and go to state 22
+    OROP                           shift and go to state 23
+    ASIG                           shift and go to state 24
+    ANDOP                          shift and go to state 26
+    NOTOP                          shift and go to state 27
+    COMPOP                         shift and go to state 28
+    ADDOP                          shift and go to state 30
+    PRODOP                         shift and go to state 31
+    PAROP                          shift and go to state 32
+    VAL                            shift and go to state 33
+    REFERENCE                      shift and go to state 34
+
+state 13
+
+    (7) FUNCTION -> VOIDTYPE ID . emptyF1 ( ARGS ) { LINES } emptyF2
+    (9) emptyF1 -> .
+    (               reduce using rule 9 (emptyF1 -> .)
+
+    emptyF1                        shift and go to state 39
+
+state 14
+
+    (1) S -> S2 TYPE emptymain MAIN . ( ) { LINES }
+    (               shift and go to state 40
+
+
+state 15
+
+    (11) GLOBALDECLAR -> TYPE ELEM emptyglobal . emptyaux RESTGLOBAL ;
+    (16) emptyaux -> .
+    ,               reduce using rule 16 (emptyaux -> .)
+    ;               reduce using rule 16 (emptyaux -> .)
+
+    emptyaux                       shift and go to state 41
+
+state 16
+
+    (8) FUNCTION -> TYPE ID emptyF1 . ( ARGS ) { LINES } emptyF2
+    (               shift and go to state 42
+
+
+state 17
+
+    (56) ELEM -> ID = . INSTR
+    (41) INSTR -> . FCALL
+    (42) INSTR -> . OROP
+    (43) INSTR -> . ASIG
+    (44) FCALL -> . ID ( FARGS )
+    (63) OROP -> . ANDOP
+    (64) OROP -> . OROP ORSIMB ANDOP
+    (62) ASIG -> . ID = INSTR
+    (65) ANDOP -> . NOTOP
+    (66) ANDOP -> . ANDOP ANDSIMB NOTOP
+    (67) NOTOP -> . COMPOP
+    (68) NOTOP -> . ! NOTOP
+    (69) COMPOP -> . ADDOP
+    (70) COMPOP -> . COMPOP COMPSIMB ADDOP
+    (71) ADDOP -> . PRODOP
+    (72) ADDOP -> . ADDOP - PRODOP
+    (73) ADDOP -> . ADDOP + PRODOP
+    (74) PRODOP -> . PAROP
+    (75) PRODOP -> . PRODOP / PAROP
+    (76) PRODOP -> . PRODOP * PAROP
+    (77) PAROP -> . VAL
+    (78) PAROP -> . ( OROP )
+    (79) VAL -> . REFERENCE
+    (80) VAL -> . ID
+    (81) VAL -> . CHAR
+    (82) VAL -> . NUMBERF
+    (83) VAL -> . NUMBER
+    (84) REFERENCE -> . & ID
+    ID              shift and go to state 20
+    !               shift and go to state 29
+    (               shift and go to state 25
+    CHAR            shift and go to state 35
+    NUMBERF         shift and go to state 36
+    NUMBER          shift and go to state 37
+    &               shift and go to state 38
+
+    INSTR                          shift and go to state 43
+    FCALL                          shift and go to state 22
+    OROP                           shift and go to state 23
+    ASIG                           shift and go to state 24
+    ANDOP                          shift and go to state 26
+    NOTOP                          shift and go to state 27
+    COMPOP                         shift and go to state 28
+    ADDOP                          shift and go to state 30
+    PRODOP                         shift and go to state 31
+    PAROP                          shift and go to state 32
+    VAL                            shift and go to state 33
+    REFERENCE                      shift and go to state 34
+
+state 18
+
+    (57) ELEM -> ID ARRAY .
+    ,               reduce using rule 57 (ELEM -> ID ARRAY .)
+    ;               reduce using rule 57 (ELEM -> ID ARRAY .)
+
+
+state 19
+
+    (59) ARRAY -> [ . NUMBER ] ARRAY
+    NUMBER          shift and go to state 44
+
+
+state 20
+
+    (44) FCALL -> ID . ( FARGS )
+    (62) ASIG -> ID . = INSTR
+    (80) VAL -> ID .
+    (               shift and go to state 45
+    =               shift and go to state 46
+    /               reduce using rule 80 (VAL -> ID .)
+    *               reduce using rule 80 (VAL -> ID .)
+    -               reduce using rule 80 (VAL -> ID .)
+    +               reduce using rule 80 (VAL -> ID .)
+    COMPSIMB        reduce using rule 80 (VAL -> ID .)
+    ANDSIMB         reduce using rule 80 (VAL -> ID .)
+    ORSIMB          reduce using rule 80 (VAL -> ID .)
+    ;               reduce using rule 80 (VAL -> ID .)
+    ,               reduce using rule 80 (VAL -> ID .)
+    )               reduce using rule 80 (VAL -> ID .)
+
+
+state 21
+
+    (17) GLOBALASIG -> ID = INSTR . ;
+    ;               shift and go to state 47
+
+
+state 22
+
+    (41) INSTR -> FCALL .
+    ;               reduce using rule 41 (INSTR -> FCALL .)
+    ,               reduce using rule 41 (INSTR -> FCALL .)
+    )               reduce using rule 41 (INSTR -> FCALL .)
+
+
+state 23
+
+    (42) INSTR -> OROP .
+    (64) OROP -> OROP . ORSIMB ANDOP
+    ;               reduce using rule 42 (INSTR -> OROP .)
+    ,               reduce using rule 42 (INSTR -> OROP .)
+    )               reduce using rule 42 (INSTR -> OROP .)
+    ORSIMB          shift and go to state 48
+
+
+state 24
+
+    (43) INSTR -> ASIG .
+    ;               reduce using rule 43 (INSTR -> ASIG .)
+    ,               reduce using rule 43 (INSTR -> ASIG .)
+    )               reduce using rule 43 (INSTR -> ASIG .)
+
+
+state 25
+
+    (78) PAROP -> ( . OROP )
+    (63) OROP -> . ANDOP
+    (64) OROP -> . OROP ORSIMB ANDOP
+    (65) ANDOP -> . NOTOP
+    (66) ANDOP -> . ANDOP ANDSIMB NOTOP
+    (67) NOTOP -> . COMPOP
+    (68) NOTOP -> . ! NOTOP
+    (69) COMPOP -> . ADDOP
+    (70) COMPOP -> . COMPOP COMPSIMB ADDOP
+    (71) ADDOP -> . PRODOP
+    (72) ADDOP -> . ADDOP - PRODOP
+    (73) ADDOP -> . ADDOP + PRODOP
+    (74) PRODOP -> . PAROP
+    (75) PRODOP -> . PRODOP / PAROP
+    (76) PRODOP -> . PRODOP * PAROP
+    (77) PAROP -> . VAL
+    (78) PAROP -> . ( OROP )
+    (79) VAL -> . REFERENCE
+    (80) VAL -> . ID
+    (81) VAL -> . CHAR
+    (82) VAL -> . NUMBERF
+    (83) VAL -> . NUMBER
+    (84) REFERENCE -> . & ID
+    !               shift and go to state 29
+    (               shift and go to state 25
+    ID              shift and go to state 50
+    CHAR            shift and go to state 35
+    NUMBERF         shift and go to state 36
+    NUMBER          shift and go to state 37
+    &               shift and go to state 38
+
+    OROP                           shift and go to state 49
+    ANDOP                          shift and go to state 26
+    NOTOP                          shift and go to state 27
+    COMPOP                         shift and go to state 28
+    ADDOP                          shift and go to state 30
+    PRODOP                         shift and go to state 31
+    PAROP                          shift and go to state 32
+    VAL                            shift and go to state 33
+    REFERENCE                      shift and go to state 34
+
+state 26
+
+    (63) OROP -> ANDOP .
+    (66) ANDOP -> ANDOP . ANDSIMB NOTOP
+    ORSIMB          reduce using rule 63 (OROP -> ANDOP .)
+    ;               reduce using rule 63 (OROP -> ANDOP .)
+    ,               reduce using rule 63 (OROP -> ANDOP .)
+    )               reduce using rule 63 (OROP -> ANDOP .)
+    ANDSIMB         shift and go to state 51
+
+
+state 27
+
+    (65) ANDOP -> NOTOP .
+    ANDSIMB         reduce using rule 65 (ANDOP -> NOTOP .)
+    ORSIMB          reduce using rule 65 (ANDOP -> NOTOP .)
+    ;               reduce using rule 65 (ANDOP -> NOTOP .)
+    ,               reduce using rule 65 (ANDOP -> NOTOP .)
+    )               reduce using rule 65 (ANDOP -> NOTOP .)
+
+
+state 28
+
+    (67) NOTOP -> COMPOP .
+    (70) COMPOP -> COMPOP . COMPSIMB ADDOP
+    ANDSIMB         reduce using rule 67 (NOTOP -> COMPOP .)
+    ORSIMB          reduce using rule 67 (NOTOP -> COMPOP .)
+    ;               reduce using rule 67 (NOTOP -> COMPOP .)
+    ,               reduce using rule 67 (NOTOP -> COMPOP .)
+    )               reduce using rule 67 (NOTOP -> COMPOP .)
+    COMPSIMB        shift and go to state 52
+
+
+state 29
+
+    (68) NOTOP -> ! . NOTOP
+    (67) NOTOP -> . COMPOP
+    (68) NOTOP -> . ! NOTOP
+    (69) COMPOP -> . ADDOP
+    (70) COMPOP -> . COMPOP COMPSIMB ADDOP
+    (71) ADDOP -> . PRODOP
+    (72) ADDOP -> . ADDOP - PRODOP
+    (73) ADDOP -> . ADDOP + PRODOP
+    (74) PRODOP -> . PAROP
+    (75) PRODOP -> . PRODOP / PAROP
+    (76) PRODOP -> . PRODOP * PAROP
+    (77) PAROP -> . VAL
+    (78) PAROP -> . ( OROP )
+    (79) VAL -> . REFERENCE
+    (80) VAL -> . ID
+    (81) VAL -> . CHAR
+    (82) VAL -> . NUMBERF
+    (83) VAL -> . NUMBER
+    (84) REFERENCE -> . & ID
+    !               shift and go to state 29
+    (               shift and go to state 25
+    ID              shift and go to state 50
+    CHAR            shift and go to state 35
+    NUMBERF         shift and go to state 36
+    NUMBER          shift and go to state 37
+    &               shift and go to state 38
+
+    NOTOP                          shift and go to state 53
+    COMPOP                         shift and go to state 28
+    ADDOP                          shift and go to state 30
+    PRODOP                         shift and go to state 31
+    PAROP                          shift and go to state 32
+    VAL                            shift and go to state 33
+    REFERENCE                      shift and go to state 34
+
+state 30
+
+    (69) COMPOP -> ADDOP .
+    (72) ADDOP -> ADDOP . - PRODOP
+    (73) ADDOP -> ADDOP . + PRODOP
+    COMPSIMB        reduce using rule 69 (COMPOP -> ADDOP .)
+    ANDSIMB         reduce using rule 69 (COMPOP -> ADDOP .)
+    ORSIMB          reduce using rule 69 (COMPOP -> ADDOP .)
+    ;               reduce using rule 69 (COMPOP -> ADDOP .)
+    ,               reduce using rule 69 (COMPOP -> ADDOP .)
+    )               reduce using rule 69 (COMPOP -> ADDOP .)
+    -               shift and go to state 54
+    +               shift and go to state 55
+
+
+state 31
+
+    (71) ADDOP -> PRODOP .
+    (75) PRODOP -> PRODOP . / PAROP
+    (76) PRODOP -> PRODOP . * PAROP
+    -               reduce using rule 71 (ADDOP -> PRODOP .)
+    +               reduce using rule 71 (ADDOP -> PRODOP .)
+    COMPSIMB        reduce using rule 71 (ADDOP -> PRODOP .)
+    ANDSIMB         reduce using rule 71 (ADDOP -> PRODOP .)
+    ORSIMB          reduce using rule 71 (ADDOP -> PRODOP .)
+    ;               reduce using rule 71 (ADDOP -> PRODOP .)
+    ,               reduce using rule 71 (ADDOP -> PRODOP .)
+    )               reduce using rule 71 (ADDOP -> PRODOP .)
+    /               shift and go to state 56
+    *               shift and go to state 57
+
+
+state 32
+
+    (74) PRODOP -> PAROP .
+    /               reduce using rule 74 (PRODOP -> PAROP .)
+    *               reduce using rule 74 (PRODOP -> PAROP .)
+    -               reduce using rule 74 (PRODOP -> PAROP .)
+    +               reduce using rule 74 (PRODOP -> PAROP .)
+    COMPSIMB        reduce using rule 74 (PRODOP -> PAROP .)
+    ANDSIMB         reduce using rule 74 (PRODOP -> PAROP .)
+    ORSIMB          reduce using rule 74 (PRODOP -> PAROP .)
+    ;               reduce using rule 74 (PRODOP -> PAROP .)
+    ,               reduce using rule 74 (PRODOP -> PAROP .)
+    )               reduce using rule 74 (PRODOP -> PAROP .)
+
+
+state 33
+
+    (77) PAROP -> VAL .
+    /               reduce using rule 77 (PAROP -> VAL .)
+    *               reduce using rule 77 (PAROP -> VAL .)
+    -               reduce using rule 77 (PAROP -> VAL .)
+    +               reduce using rule 77 (PAROP -> VAL .)
+    COMPSIMB        reduce using rule 77 (PAROP -> VAL .)
+    ANDSIMB         reduce using rule 77 (PAROP -> VAL .)
+    ORSIMB          reduce using rule 77 (PAROP -> VAL .)
+    ;               reduce using rule 77 (PAROP -> VAL .)
+    ,               reduce using rule 77 (PAROP -> VAL .)
+    )               reduce using rule 77 (PAROP -> VAL .)
+
+
+state 34
+
+    (79) VAL -> REFERENCE .
+    /               reduce using rule 79 (VAL -> REFERENCE .)
+    *               reduce using rule 79 (VAL -> REFERENCE .)
+    -               reduce using rule 79 (VAL -> REFERENCE .)
+    +               reduce using rule 79 (VAL -> REFERENCE .)
+    COMPSIMB        reduce using rule 79 (VAL -> REFERENCE .)
+    ANDSIMB         reduce using rule 79 (VAL -> REFERENCE .)
+    ORSIMB          reduce using rule 79 (VAL -> REFERENCE .)
+    ;               reduce using rule 79 (VAL -> REFERENCE .)
+    ,               reduce using rule 79 (VAL -> REFERENCE .)
+    )               reduce using rule 79 (VAL -> REFERENCE .)
+
+
+state 35
+
+    (81) VAL -> CHAR .
+    /               reduce using rule 81 (VAL -> CHAR .)
+    *               reduce using rule 81 (VAL -> CHAR .)
+    -               reduce using rule 81 (VAL -> CHAR .)
+    +               reduce using rule 81 (VAL -> CHAR .)
+    COMPSIMB        reduce using rule 81 (VAL -> CHAR .)
+    ANDSIMB         reduce using rule 81 (VAL -> CHAR .)
+    ORSIMB          reduce using rule 81 (VAL -> CHAR .)
+    ;               reduce using rule 81 (VAL -> CHAR .)
+    ,               reduce using rule 81 (VAL -> CHAR .)
+    )               reduce using rule 81 (VAL -> CHAR .)
+
+
+state 36
+
+    (82) VAL -> NUMBERF .
+    /               reduce using rule 82 (VAL -> NUMBERF .)
+    *               reduce using rule 82 (VAL -> NUMBERF .)
+    -               reduce using rule 82 (VAL -> NUMBERF .)
+    +               reduce using rule 82 (VAL -> NUMBERF .)
+    COMPSIMB        reduce using rule 82 (VAL -> NUMBERF .)
+    ANDSIMB         reduce using rule 82 (VAL -> NUMBERF .)
+    ORSIMB          reduce using rule 82 (VAL -> NUMBERF .)
+    ;               reduce using rule 82 (VAL -> NUMBERF .)
+    ,               reduce using rule 82 (VAL -> NUMBERF .)
+    )               reduce using rule 82 (VAL -> NUMBERF .)
+
+
+state 37
+
+    (83) VAL -> NUMBER .
+    /               reduce using rule 83 (VAL -> NUMBER .)
+    *               reduce using rule 83 (VAL -> NUMBER .)
+    -               reduce using rule 83 (VAL -> NUMBER .)
+    +               reduce using rule 83 (VAL -> NUMBER .)
+    COMPSIMB        reduce using rule 83 (VAL -> NUMBER .)
+    ANDSIMB         reduce using rule 83 (VAL -> NUMBER .)
+    ORSIMB          reduce using rule 83 (VAL -> NUMBER .)
+    ;               reduce using rule 83 (VAL -> NUMBER .)
+    ,               reduce using rule 83 (VAL -> NUMBER .)
+    )               reduce using rule 83 (VAL -> NUMBER .)
+
+
+state 38
+
+    (84) REFERENCE -> & . ID
+    ID              shift and go to state 58
+
+
+state 39
+
+    (7) FUNCTION -> VOIDTYPE ID emptyF1 . ( ARGS ) { LINES } emptyF2
+    (               shift and go to state 59
+
+
+state 40
+
+    (1) S -> S2 TYPE emptymain MAIN ( . ) { LINES }
+    )               shift and go to state 60
+
+
+state 41
+
+    (11) GLOBALDECLAR -> TYPE ELEM emptyglobal emptyaux . RESTGLOBAL ;
+    (12) RESTGLOBAL -> .
+    (13) RESTGLOBAL -> . , emptyglobal2 ELEM RESTGLOBAL
+    ;               reduce using rule 12 (RESTGLOBAL -> .)
+    ,               shift and go to state 62
+
+    RESTGLOBAL                     shift and go to state 61
+
+state 42
+
+    (8) FUNCTION -> TYPE ID emptyF1 ( . ARGS ) { LINES } emptyF2
+    (18) ARGS -> .
+    (19) ARGS -> . TYPE REF ARG RARGS
+    )               reduce using rule 18 (ARGS -> .)
+    TYPE            shift and go to state 63
+
+    ARGS                           shift and go to state 64
+
+state 43
+
+    (56) ELEM -> ID = INSTR .
+    ,               reduce using rule 56 (ELEM -> ID = INSTR .)
+    ;               reduce using rule 56 (ELEM -> ID = INSTR .)
+
+
+state 44
+
+    (59) ARRAY -> [ NUMBER . ] ARRAY
+    ]               shift and go to state 65
+
+
+state 45
+
+    (44) FCALL -> ID ( . FARGS )
+    (45) FARGS -> .
+    (46) FARGS -> . FARG RFARGS
+    (49) FARG -> . VAL
+    (79) VAL -> . REFERENCE
+    (80) VAL -> . ID
+    (81) VAL -> . CHAR
+    (82) VAL -> . NUMBERF
+    (83) VAL -> . NUMBER
+    (84) REFERENCE -> . & ID
+    )               reduce using rule 45 (FARGS -> .)
+    ID              shift and go to state 50
+    CHAR            shift and go to state 35
+    NUMBERF         shift and go to state 36
+    NUMBER          shift and go to state 37
+    &               shift and go to state 38
+
+    FARGS                          shift and go to state 66
+    FARG                           shift and go to state 67
+    VAL                            shift and go to state 68
+    REFERENCE                      shift and go to state 34
+
+state 46
+
+    (62) ASIG -> ID = . INSTR
+    (41) INSTR -> . FCALL
+    (42) INSTR -> . OROP
+    (43) INSTR -> . ASIG
+    (44) FCALL -> . ID ( FARGS )
+    (63) OROP -> . ANDOP
+    (64) OROP -> . OROP ORSIMB ANDOP
+    (62) ASIG -> . ID = INSTR
+    (65) ANDOP -> . NOTOP
+    (66) ANDOP -> . ANDOP ANDSIMB NOTOP
+    (67) NOTOP -> . COMPOP
+    (68) NOTOP -> . ! NOTOP
+    (69) COMPOP -> . ADDOP
+    (70) COMPOP -> . COMPOP COMPSIMB ADDOP
+    (71) ADDOP -> . PRODOP
+    (72) ADDOP -> . ADDOP - PRODOP
+    (73) ADDOP -> . ADDOP + PRODOP
+    (74) PRODOP -> . PAROP
+    (75) PRODOP -> . PRODOP / PAROP
+    (76) PRODOP -> . PRODOP * PAROP
+    (77) PAROP -> . VAL
+    (78) PAROP -> . ( OROP )
+    (79) VAL -> . REFERENCE
+    (80) VAL -> . ID
+    (81) VAL -> . CHAR
+    (82) VAL -> . NUMBERF
+    (83) VAL -> . NUMBER
+    (84) REFERENCE -> . & ID
+    ID              shift and go to state 20
+    !               shift and go to state 29
+    (               shift and go to state 25
+    CHAR            shift and go to state 35
+    NUMBERF         shift and go to state 36
+    NUMBER          shift and go to state 37
+    &               shift and go to state 38
+
+    INSTR                          shift and go to state 69
+    FCALL                          shift and go to state 22
+    OROP                           shift and go to state 23
+    ASIG                           shift and go to state 24
+    ANDOP                          shift and go to state 26
+    NOTOP                          shift and go to state 27
+    COMPOP                         shift and go to state 28
+    ADDOP                          shift and go to state 30
+    PRODOP                         shift and go to state 31
+    PAROP                          shift and go to state 32
+    VAL                            shift and go to state 33
+    REFERENCE                      shift and go to state 34
+
+state 47
+
+    (17) GLOBALASIG -> ID = INSTR ; .
+    TYPE            reduce using rule 17 (GLOBALASIG -> ID = INSTR ; .)
+    ID              reduce using rule 17 (GLOBALASIG -> ID = INSTR ; .)
+    VOIDTYPE        reduce using rule 17 (GLOBALASIG -> ID = INSTR ; .)
+
+
+state 48
+
+    (64) OROP -> OROP ORSIMB . ANDOP
+    (65) ANDOP -> . NOTOP
+    (66) ANDOP -> . ANDOP ANDSIMB NOTOP
+    (67) NOTOP -> . COMPOP
+    (68) NOTOP -> . ! NOTOP
+    (69) COMPOP -> . ADDOP
+    (70) COMPOP -> . COMPOP COMPSIMB ADDOP
+    (71) ADDOP -> . PRODOP
+    (72) ADDOP -> . ADDOP - PRODOP
+    (73) ADDOP -> . ADDOP + PRODOP
+    (74) PRODOP -> . PAROP
+    (75) PRODOP -> . PRODOP / PAROP
+    (76) PRODOP -> . PRODOP * PAROP
+    (77) PAROP -> . VAL
+    (78) PAROP -> . ( OROP )
+    (79) VAL -> . REFERENCE
+    (80) VAL -> . ID
+    (81) VAL -> . CHAR
+    (82) VAL -> . NUMBERF
+    (83) VAL -> . NUMBER
+    (84) REFERENCE -> . & ID
+    !               shift and go to state 29
+    (               shift and go to state 25
+    ID              shift and go to state 50
+    CHAR            shift and go to state 35
+    NUMBERF         shift and go to state 36
+    NUMBER          shift and go to state 37
+    &               shift and go to state 38
+
+    ANDOP                          shift and go to state 70
+    NOTOP                          shift and go to state 27
+    COMPOP                         shift and go to state 28
+    ADDOP                          shift and go to state 30
+    PRODOP                         shift and go to state 31
+    PAROP                          shift and go to state 32
+    VAL                            shift and go to state 33
+    REFERENCE                      shift and go to state 34
+
+state 49
+
+    (78) PAROP -> ( OROP . )
+    (64) OROP -> OROP . ORSIMB ANDOP
+    )               shift and go to state 71
+    ORSIMB          shift and go to state 48
+
+
+state 50
+
+    (80) VAL -> ID .
+    /               reduce using rule 80 (VAL -> ID .)
+    *               reduce using rule 80 (VAL -> ID .)
+    -               reduce using rule 80 (VAL -> ID .)
+    +               reduce using rule 80 (VAL -> ID .)
+    COMPSIMB        reduce using rule 80 (VAL -> ID .)
+    ANDSIMB         reduce using rule 80 (VAL -> ID .)
+    )               reduce using rule 80 (VAL -> ID .)
+    ORSIMB          reduce using rule 80 (VAL -> ID .)
+    ;               reduce using rule 80 (VAL -> ID .)
+    ,               reduce using rule 80 (VAL -> ID .)
+
+
+state 51
+
+    (66) ANDOP -> ANDOP ANDSIMB . NOTOP
+    (67) NOTOP -> . COMPOP
+    (68) NOTOP -> . ! NOTOP
+    (69) COMPOP -> . ADDOP
+    (70) COMPOP -> . COMPOP COMPSIMB ADDOP
+    (71) ADDOP -> . PRODOP
+    (72) ADDOP -> . ADDOP - PRODOP
+    (73) ADDOP -> . ADDOP + PRODOP
+    (74) PRODOP -> . PAROP
+    (75) PRODOP -> . PRODOP / PAROP
+    (76) PRODOP -> . PRODOP * PAROP
+    (77) PAROP -> . VAL
+    (78) PAROP -> . ( OROP )
+    (79) VAL -> . REFERENCE
+    (80) VAL -> . ID
+    (81) VAL -> . CHAR
+    (82) VAL -> . NUMBERF
+    (83) VAL -> . NUMBER
+    (84) REFERENCE -> . & ID
+    !               shift and go to state 29
+    (               shift and go to state 25
+    ID              shift and go to state 50
+    CHAR            shift and go to state 35
+    NUMBERF         shift and go to state 36
+    NUMBER          shift and go to state 37
+    &               shift and go to state 38
+
+    NOTOP                          shift and go to state 72
+    COMPOP                         shift and go to state 28
+    ADDOP                          shift and go to state 30
+    PRODOP                         shift and go to state 31
+    PAROP                          shift and go to state 32
+    VAL                            shift and go to state 33
+    REFERENCE                      shift and go to state 34
+
+state 52
+
+    (70) COMPOP -> COMPOP COMPSIMB . ADDOP
+    (71) ADDOP -> . PRODOP
+    (72) ADDOP -> . ADDOP - PRODOP
+    (73) ADDOP -> . ADDOP + PRODOP
+    (74) PRODOP -> . PAROP
+    (75) PRODOP -> . PRODOP / PAROP
+    (76) PRODOP -> . PRODOP * PAROP
+    (77) PAROP -> . VAL
+    (78) PAROP -> . ( OROP )
+    (79) VAL -> . REFERENCE
+    (80) VAL -> . ID
+    (81) VAL -> . CHAR
+    (82) VAL -> . NUMBERF
+    (83) VAL -> . NUMBER
+    (84) REFERENCE -> . & ID
+    (               shift and go to state 25
+    ID              shift and go to state 50
+    CHAR            shift and go to state 35
+    NUMBERF         shift and go to state 36
+    NUMBER          shift and go to state 37
+    &               shift and go to state 38
+
+    ADDOP                          shift and go to state 73
+    PRODOP                         shift and go to state 31
+    PAROP                          shift and go to state 32
+    VAL                            shift and go to state 33
+    REFERENCE                      shift and go to state 34
+
+state 53
+
+    (68) NOTOP -> ! NOTOP .
+    ANDSIMB         reduce using rule 68 (NOTOP -> ! NOTOP .)
+    ORSIMB          reduce using rule 68 (NOTOP -> ! NOTOP .)
+    ;               reduce using rule 68 (NOTOP -> ! NOTOP .)
+    ,               reduce using rule 68 (NOTOP -> ! NOTOP .)
+    )               reduce using rule 68 (NOTOP -> ! NOTOP .)
+
+
+state 54
+
+    (72) ADDOP -> ADDOP - . PRODOP
+    (74) PRODOP -> . PAROP
+    (75) PRODOP -> . PRODOP / PAROP
+    (76) PRODOP -> . PRODOP * PAROP
+    (77) PAROP -> . VAL
+    (78) PAROP -> . ( OROP )
+    (79) VAL -> . REFERENCE
+    (80) VAL -> . ID
+    (81) VAL -> . CHAR
+    (82) VAL -> . NUMBERF
+    (83) VAL -> . NUMBER
+    (84) REFERENCE -> . & ID
+    (               shift and go to state 25
+    ID              shift and go to state 50
+    CHAR            shift and go to state 35
+    NUMBERF         shift and go to state 36
+    NUMBER          shift and go to state 37
+    &               shift and go to state 38
+
+    PRODOP                         shift and go to state 74
+    PAROP                          shift and go to state 32
+    VAL                            shift and go to state 33
+    REFERENCE                      shift and go to state 34
+
+state 55
+
+    (73) ADDOP -> ADDOP + . PRODOP
+    (74) PRODOP -> . PAROP
+    (75) PRODOP -> . PRODOP / PAROP
+    (76) PRODOP -> . PRODOP * PAROP
+    (77) PAROP -> . VAL
+    (78) PAROP -> . ( OROP )
+    (79) VAL -> . REFERENCE
+    (80) VAL -> . ID
+    (81) VAL -> . CHAR
+    (82) VAL -> . NUMBERF
+    (83) VAL -> . NUMBER
+    (84) REFERENCE -> . & ID
+    (               shift and go to state 25
+    ID              shift and go to state 50
+    CHAR            shift and go to state 35
+    NUMBERF         shift and go to state 36
+    NUMBER          shift and go to state 37
+    &               shift and go to state 38
+
+    PRODOP                         shift and go to state 75
+    PAROP                          shift and go to state 32
+    VAL                            shift and go to state 33
+    REFERENCE                      shift and go to state 34
+
+state 56
+
+    (75) PRODOP -> PRODOP / . PAROP
+    (77) PAROP -> . VAL
+    (78) PAROP -> . ( OROP )
+    (79) VAL -> . REFERENCE
+    (80) VAL -> . ID
+    (81) VAL -> . CHAR
+    (82) VAL -> . NUMBERF
+    (83) VAL -> . NUMBER
+    (84) REFERENCE -> . & ID
+    (               shift and go to state 25
+    ID              shift and go to state 50
+    CHAR            shift and go to state 35
+    NUMBERF         shift and go to state 36
+    NUMBER          shift and go to state 37
+    &               shift and go to state 38
+
+    PAROP                          shift and go to state 76
+    VAL                            shift and go to state 33
+    REFERENCE                      shift and go to state 34
+
+state 57
+
+    (76) PRODOP -> PRODOP * . PAROP
+    (77) PAROP -> . VAL
+    (78) PAROP -> . ( OROP )
+    (79) VAL -> . REFERENCE
+    (80) VAL -> . ID
+    (81) VAL -> . CHAR
+    (82) VAL -> . NUMBERF
+    (83) VAL -> . NUMBER
+    (84) REFERENCE -> . & ID
+    (               shift and go to state 25
+    ID              shift and go to state 50
+    CHAR            shift and go to state 35
+    NUMBERF         shift and go to state 36
+    NUMBER          shift and go to state 37
+    &               shift and go to state 38
+
+    PAROP                          shift and go to state 77
+    VAL                            shift and go to state 33
+    REFERENCE                      shift and go to state 34
+
+state 58
+
+    (84) REFERENCE -> & ID .
+    /               reduce using rule 84 (REFERENCE -> & ID .)
+    *               reduce using rule 84 (REFERENCE -> & ID .)
+    -               reduce using rule 84 (REFERENCE -> & ID .)
+    +               reduce using rule 84 (REFERENCE -> & ID .)
+    COMPSIMB        reduce using rule 84 (REFERENCE -> & ID .)
+    ANDSIMB         reduce using rule 84 (REFERENCE -> & ID .)
+    ORSIMB          reduce using rule 84 (REFERENCE -> & ID .)
+    ;               reduce using rule 84 (REFERENCE -> & ID .)
+    ,               reduce using rule 84 (REFERENCE -> & ID .)
+    )               reduce using rule 84 (REFERENCE -> & ID .)
+
+
+state 59
+
+    (7) FUNCTION -> VOIDTYPE ID emptyF1 ( . ARGS ) { LINES } emptyF2
+    (18) ARGS -> .
+    (19) ARGS -> . TYPE REF ARG RARGS
+    )               reduce using rule 18 (ARGS -> .)
+    TYPE            shift and go to state 63
+
+    ARGS                           shift and go to state 78
+
+state 60
+
+    (1) S -> S2 TYPE emptymain MAIN ( ) . { LINES }
+    {               shift and go to state 79
+
+
+state 61
+
+    (11) GLOBALDECLAR -> TYPE ELEM emptyglobal emptyaux RESTGLOBAL . ;
+    ;               shift and go to state 80
+
+
+state 62
+
+    (13) RESTGLOBAL -> , . emptyglobal2 ELEM RESTGLOBAL
+    (15) emptyglobal2 -> .
+    ID              reduce using rule 15 (emptyglobal2 -> .)
+
+    emptyglobal2                   shift and go to state 81
+
+state 63
+
+    (19) ARGS -> TYPE . REF ARG RARGS
+    (22) REF -> .
+    (23) REF -> . * REF
+    ID              reduce using rule 22 (REF -> .)
+    *               shift and go to state 83
+
+    REF                            shift and go to state 82
+
+state 64
+
+    (8) FUNCTION -> TYPE ID emptyF1 ( ARGS . ) { LINES } emptyF2
+    )               shift and go to state 84
+
+
+state 65
+
+    (59) ARRAY -> [ NUMBER ] . ARRAY
+    (58) ARRAY -> .
+    (59) ARRAY -> . [ NUMBER ] ARRAY
+    ,               reduce using rule 58 (ARRAY -> .)
+    ;               reduce using rule 58 (ARRAY -> .)
+    [               shift and go to state 19
+
+    ARRAY                          shift and go to state 85
+
+state 66
+
+    (44) FCALL -> ID ( FARGS . )
+    )               shift and go to state 86
+
+
+state 67
+
+    (46) FARGS -> FARG . RFARGS
+    (47) RFARGS -> .
+    (48) RFARGS -> . , FARG RFARGS
+    )               reduce using rule 47 (RFARGS -> .)
+    ,               shift and go to state 88
+
+    RFARGS                         shift and go to state 87
+
+state 68
+
+    (49) FARG -> VAL .
+    ,               reduce using rule 49 (FARG -> VAL .)
+    )               reduce using rule 49 (FARG -> VAL .)
+
+
+state 69
+
+    (62) ASIG -> ID = INSTR .
+    ;               reduce using rule 62 (ASIG -> ID = INSTR .)
+    ,               reduce using rule 62 (ASIG -> ID = INSTR .)
+    )               reduce using rule 62 (ASIG -> ID = INSTR .)
+
+
+state 70
+
+    (64) OROP -> OROP ORSIMB ANDOP .
+    (66) ANDOP -> ANDOP . ANDSIMB NOTOP
+    ORSIMB          reduce using rule 64 (OROP -> OROP ORSIMB ANDOP .)
+    ;               reduce using rule 64 (OROP -> OROP ORSIMB ANDOP .)
+    ,               reduce using rule 64 (OROP -> OROP ORSIMB ANDOP .)
+    )               reduce using rule 64 (OROP -> OROP ORSIMB ANDOP .)
+    ANDSIMB         shift and go to state 51
+
+
+state 71
+
+    (78) PAROP -> ( OROP ) .
+    /               reduce using rule 78 (PAROP -> ( OROP ) .)
+    *               reduce using rule 78 (PAROP -> ( OROP ) .)
+    -               reduce using rule 78 (PAROP -> ( OROP ) .)
+    +               reduce using rule 78 (PAROP -> ( OROP ) .)
+    COMPSIMB        reduce using rule 78 (PAROP -> ( OROP ) .)
+    ANDSIMB         reduce using rule 78 (PAROP -> ( OROP ) .)
+    ORSIMB          reduce using rule 78 (PAROP -> ( OROP ) .)
+    ;               reduce using rule 78 (PAROP -> ( OROP ) .)
+    ,               reduce using rule 78 (PAROP -> ( OROP ) .)
+    )               reduce using rule 78 (PAROP -> ( OROP ) .)
+
+
+state 72
+
+    (66) ANDOP -> ANDOP ANDSIMB NOTOP .
+    ANDSIMB         reduce using rule 66 (ANDOP -> ANDOP ANDSIMB NOTOP .)
+    ORSIMB          reduce using rule 66 (ANDOP -> ANDOP ANDSIMB NOTOP .)
+    ;               reduce using rule 66 (ANDOP -> ANDOP ANDSIMB NOTOP .)
+    ,               reduce using rule 66 (ANDOP -> ANDOP ANDSIMB NOTOP .)
+    )               reduce using rule 66 (ANDOP -> ANDOP ANDSIMB NOTOP .)
+
+
+state 73
+
+    (70) COMPOP -> COMPOP COMPSIMB ADDOP .
+    (72) ADDOP -> ADDOP . - PRODOP
+    (73) ADDOP -> ADDOP . + PRODOP
+    COMPSIMB        reduce using rule 70 (COMPOP -> COMPOP COMPSIMB ADDOP .)
+    ANDSIMB         reduce using rule 70 (COMPOP -> COMPOP COMPSIMB ADDOP .)
+    ORSIMB          reduce using rule 70 (COMPOP -> COMPOP COMPSIMB ADDOP .)
+    ;               reduce using rule 70 (COMPOP -> COMPOP COMPSIMB ADDOP .)
+    ,               reduce using rule 70 (COMPOP -> COMPOP COMPSIMB ADDOP .)
+    )               reduce using rule 70 (COMPOP -> COMPOP COMPSIMB ADDOP .)
+    -               shift and go to state 54
+    +               shift and go to state 55
+
+
+state 74
+
+    (72) ADDOP -> ADDOP - PRODOP .
+    (75) PRODOP -> PRODOP . / PAROP
+    (76) PRODOP -> PRODOP . * PAROP
+    -               reduce using rule 72 (ADDOP -> ADDOP - PRODOP .)
+    +               reduce using rule 72 (ADDOP -> ADDOP - PRODOP .)
+    COMPSIMB        reduce using rule 72 (ADDOP -> ADDOP - PRODOP .)
+    ANDSIMB         reduce using rule 72 (ADDOP -> ADDOP - PRODOP .)
+    ORSIMB          reduce using rule 72 (ADDOP -> ADDOP - PRODOP .)
+    ;               reduce using rule 72 (ADDOP -> ADDOP - PRODOP .)
+    ,               reduce using rule 72 (ADDOP -> ADDOP - PRODOP .)
+    )               reduce using rule 72 (ADDOP -> ADDOP - PRODOP .)
+    /               shift and go to state 56
+    *               shift and go to state 57
+
+
+state 75
+
+    (73) ADDOP -> ADDOP + PRODOP .
+    (75) PRODOP -> PRODOP . / PAROP
+    (76) PRODOP -> PRODOP . * PAROP
+    -               reduce using rule 73 (ADDOP -> ADDOP + PRODOP .)
+    +               reduce using rule 73 (ADDOP -> ADDOP + PRODOP .)
+    COMPSIMB        reduce using rule 73 (ADDOP -> ADDOP + PRODOP .)
+    ANDSIMB         reduce using rule 73 (ADDOP -> ADDOP + PRODOP .)
+    ORSIMB          reduce using rule 73 (ADDOP -> ADDOP + PRODOP .)
+    ;               reduce using rule 73 (ADDOP -> ADDOP + PRODOP .)
+    ,               reduce using rule 73 (ADDOP -> ADDOP + PRODOP .)
+    )               reduce using rule 73 (ADDOP -> ADDOP + PRODOP .)
+    /               shift and go to state 56
+    *               shift and go to state 57
+
+
+state 76
+
+    (75) PRODOP -> PRODOP / PAROP .
+    /               reduce using rule 75 (PRODOP -> PRODOP / PAROP .)
+    *               reduce using rule 75 (PRODOP -> PRODOP / PAROP .)
+    -               reduce using rule 75 (PRODOP -> PRODOP / PAROP .)
+    +               reduce using rule 75 (PRODOP -> PRODOP / PAROP .)
+    COMPSIMB        reduce using rule 75 (PRODOP -> PRODOP / PAROP .)
+    ANDSIMB         reduce using rule 75 (PRODOP -> PRODOP / PAROP .)
+    ORSIMB          reduce using rule 75 (PRODOP -> PRODOP / PAROP .)
+    ;               reduce using rule 75 (PRODOP -> PRODOP / PAROP .)
+    ,               reduce using rule 75 (PRODOP -> PRODOP / PAROP .)
+    )               reduce using rule 75 (PRODOP -> PRODOP / PAROP .)
+
+
+state 77
+
+    (76) PRODOP -> PRODOP * PAROP .
+    /               reduce using rule 76 (PRODOP -> PRODOP * PAROP .)
+    *               reduce using rule 76 (PRODOP -> PRODOP * PAROP .)
+    -               reduce using rule 76 (PRODOP -> PRODOP * PAROP .)
+    +               reduce using rule 76 (PRODOP -> PRODOP * PAROP .)
+    COMPSIMB        reduce using rule 76 (PRODOP -> PRODOP * PAROP .)
+    ANDSIMB         reduce using rule 76 (PRODOP -> PRODOP * PAROP .)
+    ORSIMB          reduce using rule 76 (PRODOP -> PRODOP * PAROP .)
+    ;               reduce using rule 76 (PRODOP -> PRODOP * PAROP .)
+    ,               reduce using rule 76 (PRODOP -> PRODOP * PAROP .)
+    )               reduce using rule 76 (PRODOP -> PRODOP * PAROP .)
+
+
+state 78
+
+    (7) FUNCTION -> VOIDTYPE ID emptyF1 ( ARGS . ) { LINES } emptyF2
+    )               shift and go to state 89
+
+
+state 79
+
+    (1) S -> S2 TYPE emptymain MAIN ( ) { . LINES }
+    (25) LINES -> .
+    (26) LINES -> . LINES LINE ;
+    }               reduce using rule 25 (LINES -> .)
+    WHILE           reduce using rule 25 (LINES -> .)
+    IF              reduce using rule 25 (LINES -> .)
+    PRINT           reduce using rule 25 (LINES -> .)
+    SCANF           reduce using rule 25 (LINES -> .)
+    TYPE            reduce using rule 25 (LINES -> .)
+    ID              reduce using rule 25 (LINES -> .)
+    !               reduce using rule 25 (LINES -> .)
+    (               reduce using rule 25 (LINES -> .)
+    CHAR            reduce using rule 25 (LINES -> .)
+    NUMBERF         reduce using rule 25 (LINES -> .)
+    NUMBER          reduce using rule 25 (LINES -> .)
+    &               reduce using rule 25 (LINES -> .)
+
+    LINES                          shift and go to state 90
+
+state 80
+
+    (11) GLOBALDECLAR -> TYPE ELEM emptyglobal emptyaux RESTGLOBAL ; .
+    TYPE            reduce using rule 11 (GLOBALDECLAR -> TYPE ELEM emptyglobal emptyaux RESTGLOBAL ; .)
+    ID              reduce using rule 11 (GLOBALDECLAR -> TYPE ELEM emptyglobal emptyaux RESTGLOBAL ; .)
+    VOIDTYPE        reduce using rule 11 (GLOBALDECLAR -> TYPE ELEM emptyglobal emptyaux RESTGLOBAL ; .)
+
+
+state 81
+
+    (13) RESTGLOBAL -> , emptyglobal2 . ELEM RESTGLOBAL
+    (56) ELEM -> . ID = INSTR
+    (57) ELEM -> . ID ARRAY
+    ID              shift and go to state 92
+
+    ELEM                           shift and go to state 91
+
+state 82
+
+    (19) ARGS -> TYPE REF . ARG RARGS
+    (24) ARG -> . ID
+    ID              shift and go to state 94
+
+    ARG                            shift and go to state 93
+
+state 83
+
+    (23) REF -> * . REF
+    (22) REF -> .
+    (23) REF -> . * REF
+    ID              reduce using rule 22 (REF -> .)
+    *               shift and go to state 83
+
+    REF                            shift and go to state 95
+
+state 84
+
+    (8) FUNCTION -> TYPE ID emptyF1 ( ARGS ) . { LINES } emptyF2
+    {               shift and go to state 96
+
+
+state 85
+
+    (59) ARRAY -> [ NUMBER ] ARRAY .
+    ,               reduce using rule 59 (ARRAY -> [ NUMBER ] ARRAY .)
+    ;               reduce using rule 59 (ARRAY -> [ NUMBER ] ARRAY .)
+
+
+state 86
+
+    (44) FCALL -> ID ( FARGS ) .
+    ;               reduce using rule 44 (FCALL -> ID ( FARGS ) .)
+    ,               reduce using rule 44 (FCALL -> ID ( FARGS ) .)
+    )               reduce using rule 44 (FCALL -> ID ( FARGS ) .)
+
+
+state 87
+
+    (46) FARGS -> FARG RFARGS .
+    )               reduce using rule 46 (FARGS -> FARG RFARGS .)
+
+
+state 88
+
+    (48) RFARGS -> , . FARG RFARGS
+    (49) FARG -> . VAL
+    (79) VAL -> . REFERENCE
+    (80) VAL -> . ID
+    (81) VAL -> . CHAR
+    (82) VAL -> . NUMBERF
+    (83) VAL -> . NUMBER
+    (84) REFERENCE -> . & ID
+    ID              shift and go to state 50
+    CHAR            shift and go to state 35
+    NUMBERF         shift and go to state 36
+    NUMBER          shift and go to state 37
+    &               shift and go to state 38
+
+    FARG                           shift and go to state 97
+    VAL                            shift and go to state 68
+    REFERENCE                      shift and go to state 34
+
+state 89
+
+    (7) FUNCTION -> VOIDTYPE ID emptyF1 ( ARGS ) . { LINES } emptyF2
+    {               shift and go to state 98
+
+
+state 90
+
+    (1) S -> S2 TYPE emptymain MAIN ( ) { LINES . }
+    (26) LINES -> LINES . LINE ;
+    (27) LINE -> . WHILE ( OROP ) { LINES }
+    (28) LINE -> . IF ( OROP ) emptyif { LINES } ELSERULE
+    (29) LINE -> . PRINT ( STRING PRINTIDS )
+    (30) LINE -> . SCANF ( STRING SCANIDS )
+    (31) LINE -> . DECLAR
+    (32) LINE -> . INSTR
+    (50) DECLAR -> . TYPE POINTERS IDPRIMA
+    (41) INSTR -> . FCALL
+    (42) INSTR -> . OROP
+    (43) INSTR -> . ASIG
+    (44) FCALL -> . ID ( FARGS )
+    (63) OROP -> . ANDOP
+    (64) OROP -> . OROP ORSIMB ANDOP
+    (62) ASIG -> . ID = INSTR
+    (65) ANDOP -> . NOTOP
+    (66) ANDOP -> . ANDOP ANDSIMB NOTOP
+    (67) NOTOP -> . COMPOP
+    (68) NOTOP -> . ! NOTOP
+    (69) COMPOP -> . ADDOP
+    (70) COMPOP -> . COMPOP COMPSIMB ADDOP
+    (71) ADDOP -> . PRODOP
+    (72) ADDOP -> . ADDOP - PRODOP
+    (73) ADDOP -> . ADDOP + PRODOP
+    (74) PRODOP -> . PAROP
+    (75) PRODOP -> . PRODOP / PAROP
+    (76) PRODOP -> . PRODOP * PAROP
+    (77) PAROP -> . VAL
+    (78) PAROP -> . ( OROP )
+    (79) VAL -> . REFERENCE
+    (80) VAL -> . ID
+    (81) VAL -> . CHAR
+    (82) VAL -> . NUMBERF
+    (83) VAL -> . NUMBER
+    (84) REFERENCE -> . & ID
+    }               shift and go to state 100
+    WHILE           shift and go to state 102
+    IF              shift and go to state 103
+    PRINT           shift and go to state 104
+    SCANF           shift and go to state 105
+    TYPE            shift and go to state 99
+    ID              shift and go to state 20
+    !               shift and go to state 29
+    (               shift and go to state 25
+    CHAR            shift and go to state 35
+    NUMBERF         shift and go to state 36
+    NUMBER          shift and go to state 37
+    &               shift and go to state 38
+
+    LINE                           shift and go to state 101
+    OROP                           shift and go to state 23
+    DECLAR                         shift and go to state 106
+    INSTR                          shift and go to state 107
+    FCALL                          shift and go to state 22
+    ASIG                           shift and go to state 24
+    ANDOP                          shift and go to state 26
+    NOTOP                          shift and go to state 27
+    COMPOP                         shift and go to state 28
+    ADDOP                          shift and go to state 30
+    PRODOP                         shift and go to state 31
+    PAROP                          shift and go to state 32
+    VAL                            shift and go to state 33
+    REFERENCE                      shift and go to state 34
+
+state 91
+
+    (13) RESTGLOBAL -> , emptyglobal2 ELEM . RESTGLOBAL
+    (12) RESTGLOBAL -> .
+    (13) RESTGLOBAL -> . , emptyglobal2 ELEM RESTGLOBAL
+    ;               reduce using rule 12 (RESTGLOBAL -> .)
+    ,               shift and go to state 62
+
+    RESTGLOBAL                     shift and go to state 108
+
+state 92
+
+    (56) ELEM -> ID . = INSTR
+    (57) ELEM -> ID . ARRAY
+    (58) ARRAY -> .
+    (59) ARRAY -> . [ NUMBER ] ARRAY
+    =               shift and go to state 17
+    ,               reduce using rule 58 (ARRAY -> .)
+    ;               reduce using rule 58 (ARRAY -> .)
+    [               shift and go to state 19
+
+    ARRAY                          shift and go to state 18
+
+state 93
+
+    (19) ARGS -> TYPE REF ARG . RARGS
+    (20) RARGS -> .
+    (21) RARGS -> . , TYPE REF ARG RARGS
+    )               reduce using rule 20 (RARGS -> .)
+    ,               shift and go to state 110
+
+    RARGS                          shift and go to state 109
+
+state 94
+
+    (24) ARG -> ID .
+    ,               reduce using rule 24 (ARG -> ID .)
+    )               reduce using rule 24 (ARG -> ID .)
+
+
+state 95
+
+    (23) REF -> * REF .
+    ID              reduce using rule 23 (REF -> * REF .)
+
+
+state 96
+
+    (8) FUNCTION -> TYPE ID emptyF1 ( ARGS ) { . LINES } emptyF2
+    (25) LINES -> .
+    (26) LINES -> . LINES LINE ;
+    }               reduce using rule 25 (LINES -> .)
+    WHILE           reduce using rule 25 (LINES -> .)
+    IF              reduce using rule 25 (LINES -> .)
+    PRINT           reduce using rule 25 (LINES -> .)
+    SCANF           reduce using rule 25 (LINES -> .)
+    TYPE            reduce using rule 25 (LINES -> .)
+    ID              reduce using rule 25 (LINES -> .)
+    !               reduce using rule 25 (LINES -> .)
+    (               reduce using rule 25 (LINES -> .)
+    CHAR            reduce using rule 25 (LINES -> .)
+    NUMBERF         reduce using rule 25 (LINES -> .)
+    NUMBER          reduce using rule 25 (LINES -> .)
+    &               reduce using rule 25 (LINES -> .)
+
+    LINES                          shift and go to state 111
+
+state 97
+
+    (48) RFARGS -> , FARG . RFARGS
+    (47) RFARGS -> .
+    (48) RFARGS -> . , FARG RFARGS
+    )               reduce using rule 47 (RFARGS -> .)
+    ,               shift and go to state 88
+
+    RFARGS                         shift and go to state 112
+
+state 98
+
+    (7) FUNCTION -> VOIDTYPE ID emptyF1 ( ARGS ) { . LINES } emptyF2
+    (25) LINES -> .
+    (26) LINES -> . LINES LINE ;
+    }               reduce using rule 25 (LINES -> .)
+    WHILE           reduce using rule 25 (LINES -> .)
+    IF              reduce using rule 25 (LINES -> .)
+    PRINT           reduce using rule 25 (LINES -> .)
+    SCANF           reduce using rule 25 (LINES -> .)
+    TYPE            reduce using rule 25 (LINES -> .)
+    ID              reduce using rule 25 (LINES -> .)
+    !               reduce using rule 25 (LINES -> .)
+    (               reduce using rule 25 (LINES -> .)
+    CHAR            reduce using rule 25 (LINES -> .)
+    NUMBERF         reduce using rule 25 (LINES -> .)
+    NUMBER          reduce using rule 25 (LINES -> .)
+    &               reduce using rule 25 (LINES -> .)
+
+    LINES                          shift and go to state 113
+
+state 99
+
+    (50) DECLAR -> TYPE . POINTERS IDPRIMA
+    (51) POINTERS -> .
+    (52) POINTERS -> . * POINTERS
+    ID              reduce using rule 51 (POINTERS -> .)
+    *               shift and go to state 115
+
+    POINTERS                       shift and go to state 114
+
+state 100
+
+    (1) S -> S2 TYPE emptymain MAIN ( ) { LINES } .
+    $end            reduce using rule 1 (S -> S2 TYPE emptymain MAIN ( ) { LINES } .)
+
+
+state 101
+
+    (26) LINES -> LINES LINE . ;
+    ;               shift and go to state 116
+
+
+state 102
+
+    (27) LINE -> WHILE . ( OROP ) { LINES }
+    (               shift and go to state 117
+
+
+state 103
+
+    (28) LINE -> IF . ( OROP ) emptyif { LINES } ELSERULE
+    (               shift and go to state 118
+
+
+state 104
+
+    (29) LINE -> PRINT . ( STRING PRINTIDS )
+    (               shift and go to state 119
+
+
+state 105
+
+    (30) LINE -> SCANF . ( STRING SCANIDS )
+    (               shift and go to state 120
+
+
+state 106
+
+    (31) LINE -> DECLAR .
+    ;               reduce using rule 31 (LINE -> DECLAR .)
+
+
+state 107
+
+    (32) LINE -> INSTR .
+    ;               reduce using rule 32 (LINE -> INSTR .)
+
+
+state 108
+
+    (13) RESTGLOBAL -> , emptyglobal2 ELEM RESTGLOBAL .
+    ;               reduce using rule 13 (RESTGLOBAL -> , emptyglobal2 ELEM RESTGLOBAL .)
+
+
+state 109
+
+    (19) ARGS -> TYPE REF ARG RARGS .
+    )               reduce using rule 19 (ARGS -> TYPE REF ARG RARGS .)
+
+
+state 110
+
+    (21) RARGS -> , . TYPE REF ARG RARGS
+    TYPE            shift and go to state 121
+
+
+state 111
+
+    (8) FUNCTION -> TYPE ID emptyF1 ( ARGS ) { LINES . } emptyF2
+    (26) LINES -> LINES . LINE ;
+    (27) LINE -> . WHILE ( OROP ) { LINES }
+    (28) LINE -> . IF ( OROP ) emptyif { LINES } ELSERULE
+    (29) LINE -> . PRINT ( STRING PRINTIDS )
+    (30) LINE -> . SCANF ( STRING SCANIDS )
+    (31) LINE -> . DECLAR
+    (32) LINE -> . INSTR
+    (50) DECLAR -> . TYPE POINTERS IDPRIMA
+    (41) INSTR -> . FCALL
+    (42) INSTR -> . OROP
+    (43) INSTR -> . ASIG
+    (44) FCALL -> . ID ( FARGS )
+    (63) OROP -> . ANDOP
+    (64) OROP -> . OROP ORSIMB ANDOP
+    (62) ASIG -> . ID = INSTR
+    (65) ANDOP -> . NOTOP
+    (66) ANDOP -> . ANDOP ANDSIMB NOTOP
+    (67) NOTOP -> . COMPOP
+    (68) NOTOP -> . ! NOTOP
+    (69) COMPOP -> . ADDOP
+    (70) COMPOP -> . COMPOP COMPSIMB ADDOP
+    (71) ADDOP -> . PRODOP
+    (72) ADDOP -> . ADDOP - PRODOP
+    (73) ADDOP -> . ADDOP + PRODOP
+    (74) PRODOP -> . PAROP
+    (75) PRODOP -> . PRODOP / PAROP
+    (76) PRODOP -> . PRODOP * PAROP
+    (77) PAROP -> . VAL
+    (78) PAROP -> . ( OROP )
+    (79) VAL -> . REFERENCE
+    (80) VAL -> . ID
+    (81) VAL -> . CHAR
+    (82) VAL -> . NUMBERF
+    (83) VAL -> . NUMBER
+    (84) REFERENCE -> . & ID
+    }               shift and go to state 122
+    WHILE           shift and go to state 102
+    IF              shift and go to state 103
+    PRINT           shift and go to state 104
+    SCANF           shift and go to state 105
+    TYPE            shift and go to state 99
+    ID              shift and go to state 20
+    !               shift and go to state 29
+    (               shift and go to state 25
+    CHAR            shift and go to state 35
+    NUMBERF         shift and go to state 36
+    NUMBER          shift and go to state 37
+    &               shift and go to state 38
+
+    LINE                           shift and go to state 101
+    OROP                           shift and go to state 23
+    DECLAR                         shift and go to state 106
+    INSTR                          shift and go to state 107
+    FCALL                          shift and go to state 22
+    ASIG                           shift and go to state 24
+    ANDOP                          shift and go to state 26
+    NOTOP                          shift and go to state 27
+    COMPOP                         shift and go to state 28
+    ADDOP                          shift and go to state 30
+    PRODOP                         shift and go to state 31
+    PAROP                          shift and go to state 32
+    VAL                            shift and go to state 33
+    REFERENCE                      shift and go to state 34
+
+state 112
+
+    (48) RFARGS -> , FARG RFARGS .
+    )               reduce using rule 48 (RFARGS -> , FARG RFARGS .)
+
+
+state 113
+
+    (7) FUNCTION -> VOIDTYPE ID emptyF1 ( ARGS ) { LINES . } emptyF2
+    (26) LINES -> LINES . LINE ;
+    (27) LINE -> . WHILE ( OROP ) { LINES }
+    (28) LINE -> . IF ( OROP ) emptyif { LINES } ELSERULE
+    (29) LINE -> . PRINT ( STRING PRINTIDS )
+    (30) LINE -> . SCANF ( STRING SCANIDS )
+    (31) LINE -> . DECLAR
+    (32) LINE -> . INSTR
+    (50) DECLAR -> . TYPE POINTERS IDPRIMA
+    (41) INSTR -> . FCALL
+    (42) INSTR -> . OROP
+    (43) INSTR -> . ASIG
+    (44) FCALL -> . ID ( FARGS )
+    (63) OROP -> . ANDOP
+    (64) OROP -> . OROP ORSIMB ANDOP
+    (62) ASIG -> . ID = INSTR
+    (65) ANDOP -> . NOTOP
+    (66) ANDOP -> . ANDOP ANDSIMB NOTOP
+    (67) NOTOP -> . COMPOP
+    (68) NOTOP -> . ! NOTOP
+    (69) COMPOP -> . ADDOP
+    (70) COMPOP -> . COMPOP COMPSIMB ADDOP
+    (71) ADDOP -> . PRODOP
+    (72) ADDOP -> . ADDOP - PRODOP
+    (73) ADDOP -> . ADDOP + PRODOP
+    (74) PRODOP -> . PAROP
+    (75) PRODOP -> . PRODOP / PAROP
+    (76) PRODOP -> . PRODOP * PAROP
+    (77) PAROP -> . VAL
+    (78) PAROP -> . ( OROP )
+    (79) VAL -> . REFERENCE
+    (80) VAL -> . ID
+    (81) VAL -> . CHAR
+    (82) VAL -> . NUMBERF
+    (83) VAL -> . NUMBER
+    (84) REFERENCE -> . & ID
+    }               shift and go to state 123
+    WHILE           shift and go to state 102
+    IF              shift and go to state 103
+    PRINT           shift and go to state 104
+    SCANF           shift and go to state 105
+    TYPE            shift and go to state 99
+    ID              shift and go to state 20
+    !               shift and go to state 29
+    (               shift and go to state 25
+    CHAR            shift and go to state 35
+    NUMBERF         shift and go to state 36
+    NUMBER          shift and go to state 37
+    &               shift and go to state 38
+
+    LINE                           shift and go to state 101
+    OROP                           shift and go to state 23
+    DECLAR                         shift and go to state 106
+    INSTR                          shift and go to state 107
+    FCALL                          shift and go to state 22
+    ASIG                           shift and go to state 24
+    ANDOP                          shift and go to state 26
+    NOTOP                          shift and go to state 27
+    COMPOP                         shift and go to state 28
+    ADDOP                          shift and go to state 30
+    PRODOP                         shift and go to state 31
+    PAROP                          shift and go to state 32
+    VAL                            shift and go to state 33
+    REFERENCE                      shift and go to state 34
+
+state 114
+
+    (50) DECLAR -> TYPE POINTERS . IDPRIMA
+    (53) IDPRIMA -> . empty ELEM REST
+    (60) empty -> .
+    ID              reduce using rule 60 (empty -> .)
+
+    IDPRIMA                        shift and go to state 124
+    empty                          shift and go to state 125
+
+state 115
+
+    (52) POINTERS -> * . POINTERS
+    (51) POINTERS -> .
+    (52) POINTERS -> . * POINTERS
+    ID              reduce using rule 51 (POINTERS -> .)
+    *               shift and go to state 115
+
+    POINTERS                       shift and go to state 126
+
+state 116
+
+    (26) LINES -> LINES LINE ; .
+    }               reduce using rule 26 (LINES -> LINES LINE ; .)
+    WHILE           reduce using rule 26 (LINES -> LINES LINE ; .)
+    IF              reduce using rule 26 (LINES -> LINES LINE ; .)
+    PRINT           reduce using rule 26 (LINES -> LINES LINE ; .)
+    SCANF           reduce using rule 26 (LINES -> LINES LINE ; .)
+    TYPE            reduce using rule 26 (LINES -> LINES LINE ; .)
+    ID              reduce using rule 26 (LINES -> LINES LINE ; .)
+    !               reduce using rule 26 (LINES -> LINES LINE ; .)
+    (               reduce using rule 26 (LINES -> LINES LINE ; .)
+    CHAR            reduce using rule 26 (LINES -> LINES LINE ; .)
+    NUMBERF         reduce using rule 26 (LINES -> LINES LINE ; .)
+    NUMBER          reduce using rule 26 (LINES -> LINES LINE ; .)
+    &               reduce using rule 26 (LINES -> LINES LINE ; .)
+
+
+state 117
+
+    (27) LINE -> WHILE ( . OROP ) { LINES }
+    (63) OROP -> . ANDOP
+    (64) OROP -> . OROP ORSIMB ANDOP
+    (65) ANDOP -> . NOTOP
+    (66) ANDOP -> . ANDOP ANDSIMB NOTOP
+    (67) NOTOP -> . COMPOP
+    (68) NOTOP -> . ! NOTOP
+    (69) COMPOP -> . ADDOP
+    (70) COMPOP -> . COMPOP COMPSIMB ADDOP
+    (71) ADDOP -> . PRODOP
+    (72) ADDOP -> . ADDOP - PRODOP
+    (73) ADDOP -> . ADDOP + PRODOP
+    (74) PRODOP -> . PAROP
+    (75) PRODOP -> . PRODOP / PAROP
+    (76) PRODOP -> . PRODOP * PAROP
+    (77) PAROP -> . VAL
+    (78) PAROP -> . ( OROP )
+    (79) VAL -> . REFERENCE
+    (80) VAL -> . ID
+    (81) VAL -> . CHAR
+    (82) VAL -> . NUMBERF
+    (83) VAL -> . NUMBER
+    (84) REFERENCE -> . & ID
+    !               shift and go to state 29
+    (               shift and go to state 25
+    ID              shift and go to state 50
+    CHAR            shift and go to state 35
+    NUMBERF         shift and go to state 36
+    NUMBER          shift and go to state 37
+    &               shift and go to state 38
+
+    OROP                           shift and go to state 127
+    ANDOP                          shift and go to state 26
+    NOTOP                          shift and go to state 27
+    COMPOP                         shift and go to state 28
+    ADDOP                          shift and go to state 30
+    PRODOP                         shift and go to state 31
+    PAROP                          shift and go to state 32
+    VAL                            shift and go to state 33
+    REFERENCE                      shift and go to state 34
+
+state 118
+
+    (28) LINE -> IF ( . OROP ) emptyif { LINES } ELSERULE
+    (63) OROP -> . ANDOP
+    (64) OROP -> . OROP ORSIMB ANDOP
+    (65) ANDOP -> . NOTOP
+    (66) ANDOP -> . ANDOP ANDSIMB NOTOP
+    (67) NOTOP -> . COMPOP
+    (68) NOTOP -> . ! NOTOP
+    (69) COMPOP -> . ADDOP
+    (70) COMPOP -> . COMPOP COMPSIMB ADDOP
+    (71) ADDOP -> . PRODOP
+    (72) ADDOP -> . ADDOP - PRODOP
+    (73) ADDOP -> . ADDOP + PRODOP
+    (74) PRODOP -> . PAROP
+    (75) PRODOP -> . PRODOP / PAROP
+    (76) PRODOP -> . PRODOP * PAROP
+    (77) PAROP -> . VAL
+    (78) PAROP -> . ( OROP )
+    (79) VAL -> . REFERENCE
+    (80) VAL -> . ID
+    (81) VAL -> . CHAR
+    (82) VAL -> . NUMBERF
+    (83) VAL -> . NUMBER
+    (84) REFERENCE -> . & ID
+    !               shift and go to state 29
+    (               shift and go to state 25
+    ID              shift and go to state 50
+    CHAR            shift and go to state 35
+    NUMBERF         shift and go to state 36
+    NUMBER          shift and go to state 37
+    &               shift and go to state 38
+
+    OROP                           shift and go to state 128
+    ANDOP                          shift and go to state 26
+    NOTOP                          shift and go to state 27
+    COMPOP                         shift and go to state 28
+    ADDOP                          shift and go to state 30
+    PRODOP                         shift and go to state 31
+    PAROP                          shift and go to state 32
+    VAL                            shift and go to state 33
+    REFERENCE                      shift and go to state 34
+
+state 119
+
+    (29) LINE -> PRINT ( . STRING PRINTIDS )
+    STRING          shift and go to state 129
+
+
+state 120
+
+    (30) LINE -> SCANF ( . STRING SCANIDS )
+    STRING          shift and go to state 130
+
+
+state 121
+
+    (21) RARGS -> , TYPE . REF ARG RARGS
+    (22) REF -> .
+    (23) REF -> . * REF
+    ID              reduce using rule 22 (REF -> .)
+    *               shift and go to state 83
+
+    REF                            shift and go to state 131
+
+state 122
+
+    (8) FUNCTION -> TYPE ID emptyF1 ( ARGS ) { LINES } . emptyF2
+    (10) emptyF2 -> .
+    TYPE            reduce using rule 10 (emptyF2 -> .)
+    ID              reduce using rule 10 (emptyF2 -> .)
+    VOIDTYPE        reduce using rule 10 (emptyF2 -> .)
+
+    emptyF2                        shift and go to state 132
+
+state 123
+
+    (7) FUNCTION -> VOIDTYPE ID emptyF1 ( ARGS ) { LINES } . emptyF2
+    (10) emptyF2 -> .
+    TYPE            reduce using rule 10 (emptyF2 -> .)
+    ID              reduce using rule 10 (emptyF2 -> .)
+    VOIDTYPE        reduce using rule 10 (emptyF2 -> .)
+
+    emptyF2                        shift and go to state 133
+
+state 124
+
+    (50) DECLAR -> TYPE POINTERS IDPRIMA .
+    ;               reduce using rule 50 (DECLAR -> TYPE POINTERS IDPRIMA .)
+
+
+state 125
+
+    (53) IDPRIMA -> empty . ELEM REST
+    (56) ELEM -> . ID = INSTR
+    (57) ELEM -> . ID ARRAY
+    ID              shift and go to state 92
+
+    ELEM                           shift and go to state 134
+
+state 126
+
+    (52) POINTERS -> * POINTERS .
+    ID              reduce using rule 52 (POINTERS -> * POINTERS .)
+
+
+state 127
+
+    (27) LINE -> WHILE ( OROP . ) { LINES }
+    (64) OROP -> OROP . ORSIMB ANDOP
+    )               shift and go to state 135
+    ORSIMB          shift and go to state 48
+
+
+state 128
+
+    (28) LINE -> IF ( OROP . ) emptyif { LINES } ELSERULE
+    (64) OROP -> OROP . ORSIMB ANDOP
+    )               shift and go to state 136
+    ORSIMB          shift and go to state 48
+
+
+state 129
+
+    (29) LINE -> PRINT ( STRING . PRINTIDS )
+    (35) PRINTIDS -> .
+    (36) PRINTIDS -> . , INSTR PRINTIDS
+    )               reduce using rule 35 (PRINTIDS -> .)
+    ,               shift and go to state 138
+
+    PRINTIDS                       shift and go to state 137
+
+state 130
+
+    (30) LINE -> SCANF ( STRING . SCANIDS )
+    (33) SCANIDS -> .
+    (34) SCANIDS -> . , REFERENCE SCANIDS
+    )               reduce using rule 33 (SCANIDS -> .)
+    ,               shift and go to state 140
+
+    SCANIDS                        shift and go to state 139
+
+state 131
+
+    (21) RARGS -> , TYPE REF . ARG RARGS
+    (24) ARG -> . ID
+    ID              shift and go to state 94
+
+    ARG                            shift and go to state 141
+
+state 132
+
+    (8) FUNCTION -> TYPE ID emptyF1 ( ARGS ) { LINES } emptyF2 .
+    TYPE            reduce using rule 8 (FUNCTION -> TYPE ID emptyF1 ( ARGS ) { LINES } emptyF2 .)
+    ID              reduce using rule 8 (FUNCTION -> TYPE ID emptyF1 ( ARGS ) { LINES } emptyF2 .)
+    VOIDTYPE        reduce using rule 8 (FUNCTION -> TYPE ID emptyF1 ( ARGS ) { LINES } emptyF2 .)
+
+
+state 133
+
+    (7) FUNCTION -> VOIDTYPE ID emptyF1 ( ARGS ) { LINES } emptyF2 .
+    TYPE            reduce using rule 7 (FUNCTION -> VOIDTYPE ID emptyF1 ( ARGS ) { LINES } emptyF2 .)
+    ID              reduce using rule 7 (FUNCTION -> VOIDTYPE ID emptyF1 ( ARGS ) { LINES } emptyF2 .)
+    VOIDTYPE        reduce using rule 7 (FUNCTION -> VOIDTYPE ID emptyF1 ( ARGS ) { LINES } emptyF2 .)
+
+
+state 134
+
+    (53) IDPRIMA -> empty ELEM . REST
+    (54) REST -> .
+    (55) REST -> . , empty2 ELEM REST
+    ;               reduce using rule 54 (REST -> .)
+    ,               shift and go to state 143
+
+    REST                           shift and go to state 142
+
+state 135
+
+    (27) LINE -> WHILE ( OROP ) . { LINES }
+    {               shift and go to state 144
+
+
+state 136
+
+    (28) LINE -> IF ( OROP ) . emptyif { LINES } ELSERULE
+    (37) emptyif -> .
+    {               reduce using rule 37 (emptyif -> .)
+
+    emptyif                        shift and go to state 145
+
+state 137
+
+    (29) LINE -> PRINT ( STRING PRINTIDS . )
+    )               shift and go to state 146
+
+
+state 138
+
+    (36) PRINTIDS -> , . INSTR PRINTIDS
+    (41) INSTR -> . FCALL
+    (42) INSTR -> . OROP
+    (43) INSTR -> . ASIG
+    (44) FCALL -> . ID ( FARGS )
+    (63) OROP -> . ANDOP
+    (64) OROP -> . OROP ORSIMB ANDOP
+    (62) ASIG -> . ID = INSTR
+    (65) ANDOP -> . NOTOP
+    (66) ANDOP -> . ANDOP ANDSIMB NOTOP
+    (67) NOTOP -> . COMPOP
+    (68) NOTOP -> . ! NOTOP
+    (69) COMPOP -> . ADDOP
+    (70) COMPOP -> . COMPOP COMPSIMB ADDOP
+    (71) ADDOP -> . PRODOP
+    (72) ADDOP -> . ADDOP - PRODOP
+    (73) ADDOP -> . ADDOP + PRODOP
+    (74) PRODOP -> . PAROP
+    (75) PRODOP -> . PRODOP / PAROP
+    (76) PRODOP -> . PRODOP * PAROP
+    (77) PAROP -> . VAL
+    (78) PAROP -> . ( OROP )
+    (79) VAL -> . REFERENCE
+    (80) VAL -> . ID
+    (81) VAL -> . CHAR
+    (82) VAL -> . NUMBERF
+    (83) VAL -> . NUMBER
+    (84) REFERENCE -> . & ID
+    ID              shift and go to state 20
+    !               shift and go to state 29
+    (               shift and go to state 25
+    CHAR            shift and go to state 35
+    NUMBERF         shift and go to state 36
+    NUMBER          shift and go to state 37
+    &               shift and go to state 38
+
+    INSTR                          shift and go to state 147
+    FCALL                          shift and go to state 22
+    OROP                           shift and go to state 23
+    ASIG                           shift and go to state 24
+    ANDOP                          shift and go to state 26
+    NOTOP                          shift and go to state 27
+    COMPOP                         shift and go to state 28
+    ADDOP                          shift and go to state 30
+    PRODOP                         shift and go to state 31
+    PAROP                          shift and go to state 32
+    VAL                            shift and go to state 33
+    REFERENCE                      shift and go to state 34
+
+state 139
+
+    (30) LINE -> SCANF ( STRING SCANIDS . )
+    )               shift and go to state 148
+
+
+state 140
+
+    (34) SCANIDS -> , . REFERENCE SCANIDS
+    (84) REFERENCE -> . & ID
+    &               shift and go to state 38
+
+    REFERENCE                      shift and go to state 149
+
+state 141
+
+    (21) RARGS -> , TYPE REF ARG . RARGS
+    (20) RARGS -> .
+    (21) RARGS -> . , TYPE REF ARG RARGS
+    )               reduce using rule 20 (RARGS -> .)
+    ,               shift and go to state 110
+
+    RARGS                          shift and go to state 150
+
+state 142
+
+    (53) IDPRIMA -> empty ELEM REST .
+    ;               reduce using rule 53 (IDPRIMA -> empty ELEM REST .)
+
+
+state 143
+
+    (55) REST -> , . empty2 ELEM REST
+    (61) empty2 -> .
+    ID              reduce using rule 61 (empty2 -> .)
+
+    empty2                         shift and go to state 151
+
+state 144
+
+    (27) LINE -> WHILE ( OROP ) { . LINES }
+    (25) LINES -> .
+    (26) LINES -> . LINES LINE ;
+    }               reduce using rule 25 (LINES -> .)
+    WHILE           reduce using rule 25 (LINES -> .)
+    IF              reduce using rule 25 (LINES -> .)
+    PRINT           reduce using rule 25 (LINES -> .)
+    SCANF           reduce using rule 25 (LINES -> .)
+    TYPE            reduce using rule 25 (LINES -> .)
+    ID              reduce using rule 25 (LINES -> .)
+    !               reduce using rule 25 (LINES -> .)
+    (               reduce using rule 25 (LINES -> .)
+    CHAR            reduce using rule 25 (LINES -> .)
+    NUMBERF         reduce using rule 25 (LINES -> .)
+    NUMBER          reduce using rule 25 (LINES -> .)
+    &               reduce using rule 25 (LINES -> .)
+
+    LINES                          shift and go to state 152
+
+state 145
+
+    (28) LINE -> IF ( OROP ) emptyif . { LINES } ELSERULE
+    {               shift and go to state 153
+
+
+state 146
+
+    (29) LINE -> PRINT ( STRING PRINTIDS ) .
+    ;               reduce using rule 29 (LINE -> PRINT ( STRING PRINTIDS ) .)
+
+
+state 147
+
+    (36) PRINTIDS -> , INSTR . PRINTIDS
+    (35) PRINTIDS -> .
+    (36) PRINTIDS -> . , INSTR PRINTIDS
+    )               reduce using rule 35 (PRINTIDS -> .)
+    ,               shift and go to state 138
+
+    PRINTIDS                       shift and go to state 154
+
+state 148
+
+    (30) LINE -> SCANF ( STRING SCANIDS ) .
+    ;               reduce using rule 30 (LINE -> SCANF ( STRING SCANIDS ) .)
+
+
+state 149
+
+    (34) SCANIDS -> , REFERENCE . SCANIDS
+    (33) SCANIDS -> .
+    (34) SCANIDS -> . , REFERENCE SCANIDS
+    )               reduce using rule 33 (SCANIDS -> .)
+    ,               shift and go to state 140
+
+    SCANIDS                        shift and go to state 155
+
+state 150
+
+    (21) RARGS -> , TYPE REF ARG RARGS .
+    )               reduce using rule 21 (RARGS -> , TYPE REF ARG RARGS .)
+
+
+state 151
+
+    (55) REST -> , empty2 . ELEM REST
+    (56) ELEM -> . ID = INSTR
+    (57) ELEM -> . ID ARRAY
+    ID              shift and go to state 92
+
+    ELEM                           shift and go to state 156
+
+state 152
+
+    (27) LINE -> WHILE ( OROP ) { LINES . }
+    (26) LINES -> LINES . LINE ;
+    (27) LINE -> . WHILE ( OROP ) { LINES }
+    (28) LINE -> . IF ( OROP ) emptyif { LINES } ELSERULE
+    (29) LINE -> . PRINT ( STRING PRINTIDS )
+    (30) LINE -> . SCANF ( STRING SCANIDS )
+    (31) LINE -> . DECLAR
+    (32) LINE -> . INSTR
+    (50) DECLAR -> . TYPE POINTERS IDPRIMA
+    (41) INSTR -> . FCALL
+    (42) INSTR -> . OROP
+    (43) INSTR -> . ASIG
+    (44) FCALL -> . ID ( FARGS )
+    (63) OROP -> . ANDOP
+    (64) OROP -> . OROP ORSIMB ANDOP
+    (62) ASIG -> . ID = INSTR
+    (65) ANDOP -> . NOTOP
+    (66) ANDOP -> . ANDOP ANDSIMB NOTOP
+    (67) NOTOP -> . COMPOP
+    (68) NOTOP -> . ! NOTOP
+    (69) COMPOP -> . ADDOP
+    (70) COMPOP -> . COMPOP COMPSIMB ADDOP
+    (71) ADDOP -> . PRODOP
+    (72) ADDOP -> . ADDOP - PRODOP
+    (73) ADDOP -> . ADDOP + PRODOP
+    (74) PRODOP -> . PAROP
+    (75) PRODOP -> . PRODOP / PAROP
+    (76) PRODOP -> . PRODOP * PAROP
+    (77) PAROP -> . VAL
+    (78) PAROP -> . ( OROP )
+    (79) VAL -> . REFERENCE
+    (80) VAL -> . ID
+    (81) VAL -> . CHAR
+    (82) VAL -> . NUMBERF
+    (83) VAL -> . NUMBER
+    (84) REFERENCE -> . & ID
+    }               shift and go to state 157
+    WHILE           shift and go to state 102
+    IF              shift and go to state 103
+    PRINT           shift and go to state 104
+    SCANF           shift and go to state 105
+    TYPE            shift and go to state 99
+    ID              shift and go to state 20
+    !               shift and go to state 29
+    (               shift and go to state 25
+    CHAR            shift and go to state 35
+    NUMBERF         shift and go to state 36
+    NUMBER          shift and go to state 37
+    &               shift and go to state 38
+
+    OROP                           shift and go to state 23
+    LINE                           shift and go to state 101
+    DECLAR                         shift and go to state 106
+    INSTR                          shift and go to state 107
+    FCALL                          shift and go to state 22
+    ASIG                           shift and go to state 24
+    ANDOP                          shift and go to state 26
+    NOTOP                          shift and go to state 27
+    COMPOP                         shift and go to state 28
+    ADDOP                          shift and go to state 30
+    PRODOP                         shift and go to state 31
+    PAROP                          shift and go to state 32
+    VAL                            shift and go to state 33
+    REFERENCE                      shift and go to state 34
+
+state 153
+
+    (28) LINE -> IF ( OROP ) emptyif { . LINES } ELSERULE
+    (25) LINES -> .
+    (26) LINES -> . LINES LINE ;
+    }               reduce using rule 25 (LINES -> .)
+    WHILE           reduce using rule 25 (LINES -> .)
+    IF              reduce using rule 25 (LINES -> .)
+    PRINT           reduce using rule 25 (LINES -> .)
+    SCANF           reduce using rule 25 (LINES -> .)
+    TYPE            reduce using rule 25 (LINES -> .)
+    ID              reduce using rule 25 (LINES -> .)
+    !               reduce using rule 25 (LINES -> .)
+    (               reduce using rule 25 (LINES -> .)
+    CHAR            reduce using rule 25 (LINES -> .)
+    NUMBERF         reduce using rule 25 (LINES -> .)
+    NUMBER          reduce using rule 25 (LINES -> .)
+    &               reduce using rule 25 (LINES -> .)
+
+    LINES                          shift and go to state 158
+
+state 154
+
+    (36) PRINTIDS -> , INSTR PRINTIDS .
+    )               reduce using rule 36 (PRINTIDS -> , INSTR PRINTIDS .)
+
+
+state 155
+
+    (34) SCANIDS -> , REFERENCE SCANIDS .
+    )               reduce using rule 34 (SCANIDS -> , REFERENCE SCANIDS .)
+
+
+state 156
+
+    (55) REST -> , empty2 ELEM . REST
+    (54) REST -> .
+    (55) REST -> . , empty2 ELEM REST
+    ;               reduce using rule 54 (REST -> .)
+    ,               shift and go to state 143
+
+    REST                           shift and go to state 159
+
+state 157
+
+    (27) LINE -> WHILE ( OROP ) { LINES } .
+    ;               reduce using rule 27 (LINE -> WHILE ( OROP ) { LINES } .)
+
+
+state 158
+
+    (28) LINE -> IF ( OROP ) emptyif { LINES . } ELSERULE
+    (26) LINES -> LINES . LINE ;
+    (27) LINE -> . WHILE ( OROP ) { LINES }
+    (28) LINE -> . IF ( OROP ) emptyif { LINES } ELSERULE
+    (29) LINE -> . PRINT ( STRING PRINTIDS )
+    (30) LINE -> . SCANF ( STRING SCANIDS )
+    (31) LINE -> . DECLAR
+    (32) LINE -> . INSTR
+    (50) DECLAR -> . TYPE POINTERS IDPRIMA
+    (41) INSTR -> . FCALL
+    (42) INSTR -> . OROP
+    (43) INSTR -> . ASIG
+    (44) FCALL -> . ID ( FARGS )
+    (63) OROP -> . ANDOP
+    (64) OROP -> . OROP ORSIMB ANDOP
+    (62) ASIG -> . ID = INSTR
+    (65) ANDOP -> . NOTOP
+    (66) ANDOP -> . ANDOP ANDSIMB NOTOP
+    (67) NOTOP -> . COMPOP
+    (68) NOTOP -> . ! NOTOP
+    (69) COMPOP -> . ADDOP
+    (70) COMPOP -> . COMPOP COMPSIMB ADDOP
+    (71) ADDOP -> . PRODOP
+    (72) ADDOP -> . ADDOP - PRODOP
+    (73) ADDOP -> . ADDOP + PRODOP
+    (74) PRODOP -> . PAROP
+    (75) PRODOP -> . PRODOP / PAROP
+    (76) PRODOP -> . PRODOP * PAROP
+    (77) PAROP -> . VAL
+    (78) PAROP -> . ( OROP )
+    (79) VAL -> . REFERENCE
+    (80) VAL -> . ID
+    (81) VAL -> . CHAR
+    (82) VAL -> . NUMBERF
+    (83) VAL -> . NUMBER
+    (84) REFERENCE -> . & ID
+    }               shift and go to state 160
+    WHILE           shift and go to state 102
+    IF              shift and go to state 103
+    PRINT           shift and go to state 104
+    SCANF           shift and go to state 105
+    TYPE            shift and go to state 99
+    ID              shift and go to state 20
+    !               shift and go to state 29
+    (               shift and go to state 25
+    CHAR            shift and go to state 35
+    NUMBERF         shift and go to state 36
+    NUMBER          shift and go to state 37
+    &               shift and go to state 38
+
+    OROP                           shift and go to state 23
+    LINE                           shift and go to state 101
+    DECLAR                         shift and go to state 106
+    INSTR                          shift and go to state 107
+    FCALL                          shift and go to state 22
+    ASIG                           shift and go to state 24
+    ANDOP                          shift and go to state 26
+    NOTOP                          shift and go to state 27
+    COMPOP                         shift and go to state 28
+    ADDOP                          shift and go to state 30
+    PRODOP                         shift and go to state 31
+    PAROP                          shift and go to state 32
+    VAL                            shift and go to state 33
+    REFERENCE                      shift and go to state 34
+
+state 159
+
+    (55) REST -> , empty2 ELEM REST .
+    ;               reduce using rule 55 (REST -> , empty2 ELEM REST .)
+
+
+state 160
+
+    (28) LINE -> IF ( OROP ) emptyif { LINES } . ELSERULE
+    (38) ELSERULE -> .
+    (39) ELSERULE -> . ELSE emptyelse { LINES }
+    ;               reduce using rule 38 (ELSERULE -> .)
+    ELSE            shift and go to state 162
+
+    ELSERULE                       shift and go to state 161
+
+state 161
+
+    (28) LINE -> IF ( OROP ) emptyif { LINES } ELSERULE .
+    ;               reduce using rule 28 (LINE -> IF ( OROP ) emptyif { LINES } ELSERULE .)
+
+
+state 162
+
+    (39) ELSERULE -> ELSE . emptyelse { LINES }
+    (40) emptyelse -> .
+    {               reduce using rule 40 (emptyelse -> .)
+
+    emptyelse                      shift and go to state 163
+
+state 163
+
+    (39) ELSERULE -> ELSE emptyelse . { LINES }
+    {               shift and go to state 164
+
+
+state 164
+
+    (39) ELSERULE -> ELSE emptyelse { . LINES }
+    (25) LINES -> .
+    (26) LINES -> . LINES LINE ;
+    }               reduce using rule 25 (LINES -> .)
+    WHILE           reduce using rule 25 (LINES -> .)
+    IF              reduce using rule 25 (LINES -> .)
+    PRINT           reduce using rule 25 (LINES -> .)
+    SCANF           reduce using rule 25 (LINES -> .)
+    TYPE            reduce using rule 25 (LINES -> .)
+    ID              reduce using rule 25 (LINES -> .)
+    !               reduce using rule 25 (LINES -> .)
+    (               reduce using rule 25 (LINES -> .)
+    CHAR            reduce using rule 25 (LINES -> .)
+    NUMBERF         reduce using rule 25 (LINES -> .)
+    NUMBER          reduce using rule 25 (LINES -> .)
+    &               reduce using rule 25 (LINES -> .)
+
+    LINES                          shift and go to state 165
+
+state 165
+
+    (39) ELSERULE -> ELSE emptyelse { LINES . }
+    (26) LINES -> LINES . LINE ;
+    (27) LINE -> . WHILE ( OROP ) { LINES }
+    (28) LINE -> . IF ( OROP ) emptyif { LINES } ELSERULE
+    (29) LINE -> . PRINT ( STRING PRINTIDS )
+    (30) LINE -> . SCANF ( STRING SCANIDS )
+    (31) LINE -> . DECLAR
+    (32) LINE -> . INSTR
+    (50) DECLAR -> . TYPE POINTERS IDPRIMA
+    (41) INSTR -> . FCALL
+    (42) INSTR -> . OROP
+    (43) INSTR -> . ASIG
+    (44) FCALL -> . ID ( FARGS )
+    (63) OROP -> . ANDOP
+    (64) OROP -> . OROP ORSIMB ANDOP
+    (62) ASIG -> . ID = INSTR
+    (65) ANDOP -> . NOTOP
+    (66) ANDOP -> . ANDOP ANDSIMB NOTOP
+    (67) NOTOP -> . COMPOP
+    (68) NOTOP -> . ! NOTOP
+    (69) COMPOP -> . ADDOP
+    (70) COMPOP -> . COMPOP COMPSIMB ADDOP
+    (71) ADDOP -> . PRODOP
+    (72) ADDOP -> . ADDOP - PRODOP
+    (73) ADDOP -> . ADDOP + PRODOP
+    (74) PRODOP -> . PAROP
+    (75) PRODOP -> . PRODOP / PAROP
+    (76) PRODOP -> . PRODOP * PAROP
+    (77) PAROP -> . VAL
+    (78) PAROP -> . ( OROP )
+    (79) VAL -> . REFERENCE
+    (80) VAL -> . ID
+    (81) VAL -> . CHAR
+    (82) VAL -> . NUMBERF
+    (83) VAL -> . NUMBER
+    (84) REFERENCE -> . & ID
+    }               shift and go to state 166
+    WHILE           shift and go to state 102
+    IF              shift and go to state 103
+    PRINT           shift and go to state 104
+    SCANF           shift and go to state 105
+    TYPE            shift and go to state 99
+    ID              shift and go to state 20
+    !               shift and go to state 29
+    (               shift and go to state 25
+    CHAR            shift and go to state 35
+    NUMBERF         shift and go to state 36
+    NUMBER          shift and go to state 37
+    &               shift and go to state 38
+
+    LINE                           shift and go to state 101
+    OROP                           shift and go to state 23
+    DECLAR                         shift and go to state 106
+    INSTR                          shift and go to state 107
+    FCALL                          shift and go to state 22
+    ASIG                           shift and go to state 24
+    ANDOP                          shift and go to state 26
+    NOTOP                          shift and go to state 27
+    COMPOP                         shift and go to state 28
+    ADDOP                          shift and go to state 30
+    PRODOP                         shift and go to state 31
+    PAROP                          shift and go to state 32
+    VAL                            shift and go to state 33
+    REFERENCE                      shift and go to state 34
+
+state 166
+
+    (39) ELSERULE -> ELSE emptyelse { LINES } .
+    ;               reduce using rule 39 (ELSERULE -> ELSE emptyelse { LINES } .)
