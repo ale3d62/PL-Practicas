@@ -3,7 +3,7 @@ from sly import Parser
 NE=1 #Current tag number
 
 class BinaryNode():
-    def __init__(self, op, p1, p2):
+    def __init__(self, op, p1, p2, parser=None):
         if(op=='and'):
             if p1=="":
                 print(f"({NE}\npushl %eax;\n cmpl $0, %eax\n je Salto{NE}\n{p2} \npushl %eax;\n cmpl $0, %eax\n Salto:{NE}")
@@ -96,7 +96,13 @@ class BinaryNode():
                 self.value=""
 
         elif(op=='asig'):
-            p1.value = p2
+            print("popl %eax")
+            try:
+                ebpoffset = parser.Table[parser.ambito][1][p1][1]
+                print("movl %eax, " + str(ebpoffset) + "(%ebp)\n")
+            except:
+                print("movl %eax, " + p1+"\n")
+            #p1.value = p2
 
 
 class UnaryNode():
@@ -193,7 +199,6 @@ class CParser(Parser):
     ##
     @_('S2 TYPE emptymain MAIN "(" ")" "{" LINES "}"')
     def S(self,p):
-        print(self.GlobalTable)
         pass
 
     @_("")
@@ -268,9 +273,8 @@ class CParser(Parser):
     @_('ID "=" INSTR ";"')
     def GLOBALASIG(self,p):
         try:
-            print(self.GlobalTable)
             value = p.INSTR
-            self.GlobalTable[p.ID][0] = value
+            self.GlobalTable[p.ID] = value
         except:
             raise Exception("Variable '"+p.ID+"' undefined")
         
@@ -312,7 +316,7 @@ class CParser(Parser):
         try:
             self.Table[self.ambito][1][p.ID]=[p[-2], self.ebpOffsetArg]
         except (KeyError):
-            self.GlobalTable[p.ID] = [p[-2], self.ebpOffsetArg]
+            self.GlobalTable[p.ID] = p[-2]
         return 
 
     
@@ -527,10 +531,11 @@ class CParser(Parser):
             pointerType = ""
             if(p[-4] and "*" in p[-4]):
                 pointerType = p[-4]
+            
             try:
                 self.Table[self.ambito][1][p.ID] =[p[-3]+pointerType, self.ebpOffset]
             except (KeyError):
-                self.ºTable[p.ID] =[p[-3]+pointerType, self.ebpOffset]
+                self.GlobalTable[p.ID] =p[-3]+pointerType
 
     @_('"[" NUMBER "]" ARRAY')
     def ARRAY(self,p):
@@ -551,7 +556,8 @@ class CParser(Parser):
         try:
             self.Table[self.ambito][1][p.ID]= [valueType, self.ebpOffset]
         except (KeyError):
-            self.GlobalTable[p.ID] = [valueType, self.ebpOffset]
+            self.GlobalTable[p.ID] = valueType
+        return BinaryNode("asig", p.ID, p.INSTR, self)
 
     #INHERITANCE SIMULATION
     @_('')
@@ -571,11 +577,12 @@ class CParser(Parser):
     @_('ID "=" INSTR')                 #asig = ID '=' instr
     def ASIG(self,p):
         if p.ID in self.Table[self.ambito][1]:
-            return p.INSTR
+            return BinaryNode("asig", p.ID, p.INSTR, self)
         elif p.ID in  self.GlobalTable:
-            return p.INSTR
+            return BinaryNode("asig", p.ID, p.INSTR, self)
         else:
             raise Exception("Variable '"+p.ID+"' undefined")
+        
 
 
 
@@ -698,22 +705,28 @@ class CParser(Parser):
     @_('ID')                                #val = ID
     def VAL(self,p):
         try:
-            print("movl "+str(+self.Table[self.ambito][1][p.ID][1])+"(%ebp),%eax;")
-            print("pushl %eax;\n")
+            #print("movl "+str(+self.Table[self.ambito][1][p.ID][1])+"(%ebp),%eax;")
+            #print("pushl %eax;\n")
             return "movl "+str(+self.Table[self.ambito][1][p.ID][1])+"(%ebp),%eax;"
         except:
-            raise Exception("Variable '"+p.ID+"' undefined") 
+            #print("movl "+str(p.ID)+", %eax;")
+            #print("pushl %eax;\n")
+            return "movl "+str(p.ID)+", %eax;"
+            #raise Exception("Variable '"+p.ID+"' undefined") 
     @_('REFERENCE')
     def VAL(self,p):
         pass       
     @_('"&" ID')
     def REFERENCE(self,p):
         try:
-            print("leal "+str(self.Table[self.ambito][1][p.ID][1])+"(%ebp),%eax;")
-            print("pushl %eax\n")
+            #print("leal "+str(self.Table[self.ambito][1][p.ID][1])+"(%ebp),%eax;")
+            #print("pushl %eax\n")
             return "leal "+str(self.Table[self.ambito][1][p.ID][1])+"(%ebp),%eax;\n"
         except:
-            raise Exception("Variable '"+p.ID+"' undefined") 
+            #print("leal "+str(p.ID)+", %eax;")
+            #print("pushl %eax\n")
+            return "leal "+str(p.ID)+", %eax;"
+            #raise Exception("Variable '"+p.ID+"' undefined") 
         
 
 
@@ -733,6 +746,7 @@ if __name__ == '__main__':
     print("")
 
     result = parser.parse(lexer.tokenize(text))
+    print(parser.GlobalTable)
     print(parser.Table)
     #except Exception as e:
     #    print("[ERROR] " + str(e))

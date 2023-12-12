@@ -1,18 +1,7 @@
-int fact(int* p){
-
-}
+int b;
+int a = 3;
 
 int main(){
-    int* a = 1;
-    if(a<=1 && a>=1){
-    int b = fact(&a);}
-    else{a=2;};
-    while(a == 2){
-        while(b == 4 && a == 2 && !0){
-            if(a){
-
-            };
-        };
-    };
+    b = 5+a;
 }
 
