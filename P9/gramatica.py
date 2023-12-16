@@ -4,6 +4,10 @@ NE=1 #Current tag number
 
 class BinaryNode():
     def __init__(self, op, p1, p2, parser=None):
+
+        ##
+        ##Logical operations
+        ##
         if(op=='and'):
             if p1=="":
                 print(f"({NE}\npushl %eax;\n cmpl $0, %eax\n je Salto{NE}\n{p2} \npushl %eax;\n cmpl $0, %eax\n Salto:{NE}")
@@ -20,8 +24,6 @@ class BinaryNode():
                 print(f"{p2}\nmovl %eax, %ebx;\n\n{p1}\n cmpl $0,%eax\n jne Salto{NE}\n \nmovl %ebx,%eax;\n cmpl $0, %eax\n Salto {NE}:")
                 self.value=""
            
-            
-            
         elif(op=='=='):
             if p1=="":
                 print(f"{p1}\npushl %eax;\n{p2}\nmov %eax,%ebx;\npopl %eax\ncmpl %ebx,%eax\n")
@@ -59,9 +61,13 @@ class BinaryNode():
             else:
                 print(f"{p2}\npushl %eax;\n{p1}\nmovl popl %ebx;\ncmpl %eax,%ebx;\nmov %ebx,%eax\n")
                 self.value=""
-
         elif(op=='!='):
             self.value = p1 != p2
+
+
+        ##
+        ##Arithmetic operations
+        ##
         elif(op=='+'):
             if p1=="":
                 print(p1+"\npushl %eax;\n"+p2+"\nmovl %eax, %ebx;\npopl %eax;\naddl %ebx,%eax;\n")
@@ -69,7 +75,6 @@ class BinaryNode():
             else:
                  print(p2+"\npushl %eax;\n"+p1+"\nmovl %eax, %ebx;\npopl %eax;\naddl %ebx,%eax;\n")
                  self.value=""
-
         elif(op=='-'):
             if p1=="":
                 print(p1+"\npushl %eax\n"+p2+"movl %eax, %ebx;\npopl %eax;\nsubl %ebx,%eax;\n")
@@ -77,7 +82,6 @@ class BinaryNode():
             else:
                 print(p2+"\npushl %eax;\n"+p1+"\nmovl %eax, %ebx;\npopl %eax;\nsubl %ebx,%eax;\n")
                 self.value=""
-
         elif(op=='*'):
             if p1=="":
                 print(p1+"\npush %eax;\n"+p2+"\nmovl %eax,%ebx;\npopl %eax\nimmull %ebx,%eax;")
@@ -85,8 +89,6 @@ class BinaryNode():
             else:
                 print(p2+"\npush %eax;\n"+p1+"\nmovl %eax,%ebx;\npopl %eax\nimmull %ebx,%eax;")
                 self.value=""
-
-
         elif(op=='/'):
             if p1=="":
                 print(p1+"\npush %eax\n"+p2+"\nmovl %eax,%ebx\npopl %eax\ncdq;\nsubl idivl %ebx;")
@@ -95,6 +97,9 @@ class BinaryNode():
                 print("push %eax\n"+p2+"\nmovl %eax,%ebx\npopl %eax\ncdq;\nsubl idivl %ebx;")
                 self.value=""
 
+        ##
+        ##Assignment
+        ##
         elif(op=='asig'):
             print("popl %eax")
             try:
@@ -103,6 +108,8 @@ class BinaryNode():
             except:
                 print("movl %eax, " + p1+"\n")
             #p1.value = p2
+
+
 
 
 class UnaryNode():
@@ -727,8 +734,10 @@ class CParser(Parser):
         except:
             #print("movl "+str(p.ID)+", %eax;")
             #print("pushl %eax;\n")
-            return "movl "+str(p.ID)+", %eax;"
-            #raise Exception("Variable '"+p.ID+"' undefined") 
+            if(p.ID in self.GlobalTable):
+                return "movl "+str(p.ID)+", %eax;"
+            else:
+                raise Exception("Variable '"+p.ID+"' undefined") 
     @_('REFERENCE')
     def VAL(self,p):
         pass       
@@ -762,7 +771,7 @@ if __name__ == '__main__':
     print("")
 
     result = parser.parse(lexer.tokenize(text))
-    print(parser.GlobalTable)
-    print(parser.Table)
+    print("Global variables table: "+ str(parser.GlobalTable))
+    print("Function variables table: " + str(parser.Table))
     #except Exception as e:
     #    print("[ERROR] " + str(e))

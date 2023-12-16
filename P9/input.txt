@@ -1,15 +1,6 @@
-int b;
-int a = 3;
-
-int fact(){
-    int c = b + 2;
-}
-
-void vacio(){
-    int d = 6;
-}
+int a = 4;
 
 int main(){
-    b = 5+a;
+    int b = 5+a;
 }
 
