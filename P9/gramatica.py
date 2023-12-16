@@ -4,7 +4,6 @@ NE=1 #Current tag number
 
 class BinaryNode():
     def __init__(self, op, p1, p2, parser=None):
-
         ##
         ##Logical operations
         ##
@@ -23,7 +22,7 @@ class BinaryNode():
             else:
                 print(f"{p2}\nmovl %eax, %ebx;\n\n{p1}\n cmpl $0,%eax\n jne Salto{NE}\n \nmovl %ebx,%eax;\n cmpl $0, %eax\n Salto {NE}:")
                 self.value=""
-           
+        
         elif(op=='=='):
             if p1=="":
                 print(f"{p1}\npushl %eax;\n{p2}\nmov %eax,%ebx;\npopl %eax\ncmpl %ebx,%eax\n")
@@ -31,7 +30,6 @@ class BinaryNode():
             else:
                 print(f"{p2}\npushl %eax;\n{p1}\nmovl popl %ebx;\ncmpl %ebx,%eax;\n")
                 self.value=""
-
             self.value = p1 == p2
         elif(op=='<='):
             if p1=="":
@@ -47,13 +45,14 @@ class BinaryNode():
             else:
                 print(f"{p2}\npushl %eax;\n{p1}\nmovl popl %ebx;\ncmpl %eax,%ebx;\nmov %ebx,%eax\n")
                 self.value=""
+            self.value = p1 >= p2
         elif(op=='<'):
             if p1=="":
                 print(f"{p1}\npushl %eax;\n{p2}\nmov %eax,%ebx;\npopl %eax\ncmpl %ebx,%eax\n")
                 self.value=""
             else:
                 print(f"{p2}\npushl %eax;\n{p1}\nmovl popl %ebx;\ncmpl %ebx,%eax;\n")
-            self.value = p1 <= p2
+            self.value = p1 < p2
         elif(op=='>'):
             if p1=="":
                 print(f"{p1}\npushl %eax;\n{p2}\nmov %eax,%ebx;\npopl %eax\ncmpl %eax,%ebx\nmov %ebx,%eax")
@@ -61,6 +60,7 @@ class BinaryNode():
             else:
                 print(f"{p2}\npushl %eax;\n{p1}\nmovl popl %ebx;\ncmpl %eax,%ebx;\nmov %ebx,%eax\n")
                 self.value=""
+            self.value = p1 > p2
         elif(op=='!='):
             self.value = p1 != p2
 
@@ -77,37 +77,35 @@ class BinaryNode():
                  self.value=""
         elif(op=='-'):
             if p1=="":
-                print(p1+"\npushl %eax\n"+p2+"movl %eax, %ebx;\npopl %eax;\nsubl %ebx,%eax;\n")
+                print(p1+"\npushl %eax\n"+p2+"\nmovl %eax, %ebx;\npopl %eax;\nsubl %ebx,%eax;\n")
                 self.value=""
             else:
                 print(p2+"\npushl %eax;\n"+p1+"\nmovl %eax, %ebx;\npopl %eax;\nsubl %ebx,%eax;\n")
                 self.value=""
         elif(op=='*'):
             if p1=="":
-                print(p1+"\npush %eax;\n"+p2+"\nmovl %eax,%ebx;\npopl %eax\nimmull %ebx,%eax;")
+                print(p1+"\npushl %eax;\n"+p2+"\nmovl %eax,%ebx;\npopl %eax\nimmull %ebx,%eax;")
                 self.value=""
             else:
-                print(p2+"\npush %eax;\n"+p1+"\nmovl %eax,%ebx;\npopl %eax\nimmull %ebx,%eax;")
+                print(p2+"\npushl %eax;\n"+p1+"\nmovl %eax,%ebx;\npopl %eax\nimmull %ebx,%eax;")
                 self.value=""
         elif(op=='/'):
             if p1=="":
-                print(p1+"\npush %eax\n"+p2+"\nmovl %eax,%ebx\npopl %eax\ncdq;\nsubl idivl %ebx;")
+                print(p1+"\npushl %eax\n"+p2+"\nmovl %eax,%ebx\npopl %eax\ncdq;\ndivl %ebx;")
                 self.value=""
             else:
-                print("push %eax\n"+p2+"\nmovl %eax,%ebx\npopl %eax\ncdq;\nsubl idivl %ebx;")
+                print(p2+"\npushl %eax\n"+p1+"\nmovl %eax,%ebx\npopl %eax\ncdq;\ndivl %ebx;")
                 self.value=""
 
         ##
         ##Assignment
         ##
         elif(op=='asig'):
-            print("popl %eax")
             try:
                 ebpoffset = parser.Table[parser.ambito][1][p1][1]
                 print("movl %eax, " + str(ebpoffset) + "(%ebp)\n")
             except:
                 print("movl %eax, " + p1+"\n")
-            #p1.value = p2
 
 
 
@@ -135,7 +133,7 @@ class CLexer(Lexer):
     # Regular expression rules for tokens
     ID = r'(?!int\b|float\b|char\b|void\b|main\b|printf\b|scanf\b|if\b|else\b|while\b|\[|\])[a-zA-Z_][a-zA-Z0-9_]*'
     
-    COMPSIMB = r'==|<=|>=|!='
+    COMPSIMB = r'==|<=|>=|!=|<|>'
     ORSIMB = r'\|\|'
     ANDSIMB =r'\&\&'
     TYPE = r'int|float|char'
@@ -216,10 +214,13 @@ class CParser(Parser):
     def emptymain(self,p):
         self.ambito="main"
         self.Table[self.ambito]=["int",dict()]
+        #EL PROLOGO LO DEJAMOS PARA CUANDO VAYAMOS A ESCRIBIR EN EL FICHERO FINAL, YA QUE HAY QUE SABER CUANTAS
+        #VARIABLES LOCALES HAY, Y ESO LO SABEMOS AL FINAL DE LA EJECUCION, POR LO QUE PRINT NO SIRVE, ESTE CODIGO
+        #ADEMAS PROBABLEMENTE TENGA QUE IR JUNTO CON EL EPILOGO, CUANDO YA SE HAYA EJECUTADO TODO
         #prologue
-        print("pushl %ebp   #PROLOGUE")
-        print("movl %esp, %ebp")
-        print("subl $4, %esp\n")
+        #print("pushl %ebp   #PROLOGUE")
+        #print("movl %esp, %ebp")
+        #print("subl $" + NUMERO_DE_VARIABLES_LOCALES_*4, %esp\n")
         pass
         
     @_('S2 FUNCTION')
@@ -458,7 +459,6 @@ class CParser(Parser):
     ##
     ## LANGUAJE INSTRUCTIONS
     ##
-   # @_('ID "("    )')
     @_('ASIG')                              #instr = asig
     def INSTR(self,p):
         return p.ASIG
@@ -513,7 +513,8 @@ class CParser(Parser):
     #DECLARATIONS
     @_('TYPE POINTERS IDPRIMA')
     def DECLAR(self,p):
-        print("subl $"+str(-1*self.ebpOffset)+", %esp")
+        #No entiendo muy bien que hace esto aqui, lo comento porque no le veo sentido
+        #print("subl $"+str(-1*self.ebpOffset)+", %esp")
         pass
 
     @_('"*" POINTERS')
@@ -537,7 +538,6 @@ class CParser(Parser):
         pass
 
         
-    #Esto hay que cambiarlo para que meta los tipos puntero
     @_('ID ARRAY')
     def ELEM(self,p):
         arraySizes = p.ARRAY
@@ -573,7 +573,6 @@ class CParser(Parser):
 
     @_('ID "=" INSTR')
     def ELEM(self,p):
-        #valueType = p[-6]+p[-4] #no se que hacia esto asi pero p[-6] devuelve nonetype y p[-4] el tipo
         valueType = p[-4]
 
         try:
@@ -645,18 +644,7 @@ class CParser(Parser):
 
     @_('COMPOP COMPSIMB ADDOP')             #compOp = compOp compSimb addOp
     def COMPOP(self,p):
-        if(p.COMPSIMB == "=="):
-            return BinaryNode('==', p.COMPOP, p.ADDOP).value
-        elif(p.COMPSIMB == "<="):
-            return BinaryNode('<=', p.COMPOP, p.ADDOP).value
-        elif(p.COMPSIMB == ">="):
-            return BinaryNode('>=', p.COMPOP, p.ADDOP).value
-        elif(p.COMPSIMB == "<"):
-            return BinaryNode('<', p.COMPOP, p.ADDOP).value
-        elif(p.COMPSIMB == ">"):
-            return BinaryNode('>', p.COMPOP, p.ADDOP).value
-        elif(p.COMPSIMB == "!="):
-            return BinaryNode('!=', p.COMPOP, p.ADDOP).value
+        return BinaryNode(p.COMPSIMB, p.COMPOP, p.ADDOP).value
 
     @_('ADDOP')                             #compOp = addOp
     def COMPOP(self,p):
@@ -665,31 +653,31 @@ class CParser(Parser):
 
     @_('ADDOP "+" PRODOP')                  #addOp = addOp + prodOp
     def ADDOP(self,p):
-        pass
+        
         return BinaryNode('+', p.ADDOP, p.PRODOP).value
         #return p.ADDOP + p.PRODOP
 
     @_('ADDOP "-" PRODOP')                  #addOp = addOp - prodOp
     def ADDOP(self,p):
-        pass
+        
         return BinaryNode('-', p.ADDOP, p.PRODOP).value
         #return p.ADDOP-p.PRODOP
 
     @_('PRODOP')                            #addOp = prodOp
     def ADDOP(self,p):
-        pass
+        
         return p.PRODOP
 
 
     @_('PRODOP "*" PAROP')                  #prodOp = prodOp * parOp
     def PRODOP(self,p):
-        pass
+        
         return BinaryNode('*', p.PRODOP, p.PAROP).value
         #return p.PRODOP * p.PAROP
 
     @_('PRODOP "/" PAROP')                  #prodOp = prodOp / parOp
     def PRODOP(self,p):
-        pass
+        
         return BinaryNode('/', p.PRODOP, p.PAROP).value
         #return p.PRODOP / p.PAROP
         
@@ -714,7 +702,7 @@ class CParser(Parser):
 
     @_('NUMBER')                            #val = NUMBER
     def VAL(self,p):
-        print("movl $("+str(p.NUMBER)+"), %eax;\npushl %eax")
+        #print("movl $("+str(p.NUMBER)+"), %eax;\npushl %eax")
         return "movl $("+str(p.NUMBER)+"), %eax;"
 
     @_('NUMBERF')                            #val = NUMBERF
@@ -728,12 +716,8 @@ class CParser(Parser):
     @_('ID')                                #val = ID
     def VAL(self,p):
         try:
-            #print("movl "+str(+self.Table[self.ambito][1][p.ID][1])+"(%ebp),%eax;")
-            #print("pushl %eax;\n")
             return "movl "+str(+self.Table[self.ambito][1][p.ID][1])+"(%ebp),%eax;"
         except:
-            #print("movl "+str(p.ID)+", %eax;")
-            #print("pushl %eax;\n")
             if(p.ID in self.GlobalTable):
                 return "movl "+str(p.ID)+", %eax;"
             else:
@@ -744,14 +728,12 @@ class CParser(Parser):
     @_('"&" ID')
     def REFERENCE(self,p):
         try:
-            #print("leal "+str(self.Table[self.ambito][1][p.ID][1])+"(%ebp),%eax;")
-            #print("pushl %eax\n")
             return "leal "+str(self.Table[self.ambito][1][p.ID][1])+"(%ebp),%eax;\n"
         except:
-            #print("leal "+str(p.ID)+", %eax;")
-            #print("pushl %eax\n")
-            return "leal "+str(p.ID)+", %eax;"
-            #raise Exception("Variable '"+p.ID+"' undefined") 
+            if(p.ID in self.GlobalTable):
+                return "leal "+str(p.ID)+", %eax;"
+            else:
+                raise Exception("Variable '"+p.ID+"' undefined") 
         
 
 

@@ -1,6 +1,4 @@
-int a = 4;
-
 int main(){
-    int b = 5+a;
+    int a = 2+4>=2;
 }
 
