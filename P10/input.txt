@@ -1,8 +1,12 @@
-int main(){
-    int a;
-    while(1){
-        a = a+1;
-    };
+int c;
 
+int fact(int b, int a){
+    return;
+}
+
+int main(){
+    int a = 2;
+    int b = 4;
+    return fact(&a,c);
 }
 

@@ -59,7 +59,8 @@ class BinaryNode():
         ##Declaration
         ##
         elif(op=='declar'):
-            self.value = "subl $"+str(-1*parser.ebpOffset)+", %esp\n"+p2+"\n"
+            self.value = "subl $"+str(-1*parser.ebpOffset)+", %esp\n"+p2
+
 
         elif(op=='if'):
             self.value = f"{p1}cmpl $0,%eax\nje false{NE}\n{p2[0]}jmp final{NE}\nfalse{NE}:\n{p2[1]}\nfinal{NE}:\n"
@@ -84,7 +85,7 @@ class UnaryNode():
 
 class CLexer(Lexer):
     
-    tokens = {NUMBER,NUMBERF,CHAR, ID, TYPE,VOIDTYPE, COMPSIMB, ANDSIMB, ORSIMB,MAIN,PRINT,SCANF, STRING, IF, ELSE, WHILE}
+    tokens = {NUMBER,NUMBERF,CHAR, ID, TYPE,VOIDTYPE, COMPSIMB, ANDSIMB, ORSIMB,MAIN,PRINT,SCANF, STRING, IF, ELSE, WHILE, RETURN}
 
     # Ignored characters
     ignore = ' \t'
@@ -92,7 +93,7 @@ class CLexer(Lexer):
     literals = { ';', '(', ')', '=', '<', '>', '!', "+", "-", "*", "/", ',','{','}', '&', '[', ']'}
 
     # Regular expression rules for tokens
-    ID = r'(?!int\b|float\b|char\b|void\b|main\b|printf\b|scanf\b|if\b|else\b|while\b|\[|\])[a-zA-Z_][a-zA-Z0-9_]*'
+    ID = r'(?!int\b|float\b|char\b|void\b|main\b|printf\b|scanf\b|if\b|else\b|while\b|return\b|\[|\])[a-zA-Z_][a-zA-Z0-9_]*'
     
     COMPSIMB = r'==|<=|>=|!=|<|>'
     ORSIMB = r'\|\|'
@@ -106,6 +107,7 @@ class CLexer(Lexer):
     IF = r'if'
     ELSE = r'else'
     WHILE = r'while'
+    RETURN = r'return'
 
 
     ignore_newline = r'\n+'
@@ -143,9 +145,9 @@ class CLexer(Lexer):
 
 #PARSER
 class CParser(Parser):
-    Table=dict()
-    GlobalTable={}
-    ambito="0" #0 indicates global scope
+    Table=dict()    #LocalTable Structure: {funcName: [funcType, {varName: [vartype, varEbpOffset]}, {otherVars...}], [otherFunc...]}
+    GlobalTable={}  #GlobalTable Structure: {varName: varType, varName2: varType2, ...}
+    ambito="0"      #0 indicates global scope
     ebpOffset = 0
     ebpOffsetArg = 0
 
@@ -165,26 +167,18 @@ class CParser(Parser):
     ##
     @_('S2 TYPE emptymain MAIN "(" ")" "{" LINES "}"')
     def S(self,p):
-        #main epilogue
-        print("movl %ebp %esp   #EPILOGUE")
-        print("popl %ebp")
-        print("ret\n")
         pass
 
     @_("")
     def emptymain(self,p):
         self.ambito="main"
         self.Table[self.ambito]=["int",dict()]
-        print("pushl %ebp   #PROLOGUE")
+        print("pushl %ebp   #"+self.ambito+" PROLOGUE")
         print("movl %esp, %ebp\n")
         pass
         
     @_('S2 FUNCTION')
     def S2(self,p):
-        #function epilogue
-        print("movl %ebp %esp   #EPILOGUE")
-        print("popl %ebp")
-        print("ret\n")
         pass
 
     @_('S2 GLOBALDECLAR')
@@ -212,11 +206,11 @@ class CParser(Parser):
     @_('')
     def emptyF1(self,p):
         #function prologue
-        print("pushl %ebp   #PROLOGUE")
-        print("movl %esp, %ebp")
         self.ebpOffsetArg += 4
         self.ambito=p[-1]
         self.Table[self.ambito]=[p[-2], dict(), self.ebpOffsetArg]
+        print("pushl %ebp   #"+self.ambito+" PROLOGUE")
+        print("movl %esp, %ebp\n")
         return p[-2]
         
     @_('')
@@ -293,16 +287,16 @@ class CParser(Parser):
     @_('ID')
     def ARG(self,p):
         try:
-            self.Table[self.ambito][1][p.ID]=[p[-2], self.ebpOffsetArg]
+            self.Table[self.ambito][1][p.ID]=[p[-3], self.ebpOffsetArg]
         except (KeyError):
-            self.GlobalTable[p.ID] = p[-2]
+            self.GlobalTable[p.ID] = p[-3]
         return 
 
     
 
     @_('LINES LINE ";"')                        #S = S line ';'
     def LINES(self, p):
-        return p.LINES + p.LINE
+        return str(p.LINES) + str(p.LINE)
 
     @_('')                                  #S = epsilon
     def LINES(self,p):
@@ -314,13 +308,33 @@ class CParser(Parser):
     ##
     @_('INSTR')                        #LINE = instr
     def LINE(self, p):
+        print(p.INSTR)
         return p.INSTR
 
     @_('DECLAR')                        #LINE = declar
     def LINE(self, p):
         print(p.DECLAR)
         return p.DECLAR
+
+    #RETURN
+    #Return statements of the form: return a=2; are not considered,the output of this type of statements will be incorrect if used
+    @_('RETURN INSTR')
+    def LINE(self, p):
+        print("#Save return value in %eax\n" + str(p.INSTR))
+        print("movl %ebp %esp   #"+self.ambito+" EPILOGUE")
+        print("popl %ebp")
+        print("ret\n")
+        pass
+
+    @_('RETURN')
+    def LINE(self, p):
+        print("movl %ebp %esp   #"+self.ambito+" EPILOGUE")
+        print("popl %ebp")
+        print("ret\n")
+        pass
         
+
+    ##SCANF
     @_('SCANF "(" STRING SCANIDS ")"')
     def LINE(self,p):
         L=list()
@@ -335,8 +349,7 @@ class CParser(Parser):
         if vars==percents:
            pass
         else:
-            raise Exception("Too many variables in scanf")
-                
+            raise Exception("Too many variables in scanf")         
             
     @_(", REFERENCE SCANIDS ")
     def SCANIDS(self,p):
@@ -350,6 +363,8 @@ class CParser(Parser):
     def SCANIDS(self,p):
         return []
 
+
+    ##PRINTF
     @_('PRINT "(" STRING PRINTIDS ")"')
     def LINE(self, p):
         L=list()
@@ -370,7 +385,6 @@ class CParser(Parser):
             print("Call printf")
             print("addl $"+str((vars+1)*4)+",%esp")
     
-    
     @_('"," INSTR PRINTIDS')
     def PRINTIDS(self,p):
         L=[]
@@ -382,6 +396,7 @@ class CParser(Parser):
     @_('')
     def PRINTIDS(self,p):
         return []
+
 
     #if statements must use {} and end with ";". if there is an else, the 
     #";" must be after the else, not the if
@@ -421,7 +436,7 @@ class CParser(Parser):
         
     @_('FCALL')
     def INSTR(self,p):
-        pass
+        return p.FCALL
     
 
     @_('ID "(" FARGS ")"')
@@ -429,11 +444,13 @@ class CParser(Parser):
         L=(p.FARGS)
         if(not L):
             if(len(self.Table[p.ID][1]) == 0):
-                print("Call "+p.ID+"\n")
+                return "Call "+p.ID+"\n"
         elif(len(L)==len(self.Table[p.ID][1])):
-            print("Call "+p.ID+"\n")
-            print("addl $"+str(len(L)*4)+",%esp")
-        pass
+            returnstr = ""
+            for iarg in reversed(range(len(L))):
+                returnstr += str(L[iarg])+"pushl %eax\n"
+            return returnstr+"Call "+p.ID+"\naddl $"+str(len(L)*4)+",%esp\n"
+        raise Exception("Incorrect parameters when calling: " + p.ID)
 
     @_('FARG RFARGS' )
     def FARGS(self,p):
@@ -444,7 +461,7 @@ class CParser(Parser):
     
     @_('')
     def FARGS(self,p):
-        pass
+        return ""
 
     @_('"," FARG RFARGS')
     def RFARGS(self,p):
@@ -486,7 +503,6 @@ class CParser(Parser):
     @_('')
     def REST(self,p):
         return ""
-
         
     @_('ID ARRAY')
     def ELEM(self,p):
@@ -522,11 +538,11 @@ class CParser(Parser):
     def ARRAY(self,p):
         return []
 
-
+    
+    #DECLARATION INITIALIZATION
     @_('ID "=" INSTR')
     def ELEM(self,p):
         valueType = p[-4]
-
         try:
             self.Table[self.ambito][1][p.ID]= [valueType, self.ebpOffset]
         except (KeyError):
@@ -547,7 +563,7 @@ class CParser(Parser):
 
 
 
-
+    #ASSIGNMENTS
     @_('ID "=" INSTR')                 #asig = ID '=' instr
     def ASIG(self,p):
         if p.ID in self.Table[self.ambito][1]:
@@ -667,7 +683,7 @@ class CParser(Parser):
     @_('ID')                                #val = ID
     def VAL(self,p):
         try:
-            return "movl "+str(+self.Table[self.ambito][1][p.ID][1])+"(%ebp),%eax"
+            return "movl "+str(+self.Table[self.ambito][1][p.ID][1])+"(%ebp),%eax\n"
         except:
             if(p.ID in self.GlobalTable):
                 return "movl "+str(p.ID)+", %eax\n"
@@ -675,7 +691,8 @@ class CParser(Parser):
                 raise Exception("Variable '"+p.ID+"' undefined") 
     @_('REFERENCE')
     def VAL(self,p):
-        pass       
+        return p.REFERENCE
+
     @_('"&" ID')
     def REFERENCE(self,p):
         try:
@@ -686,6 +703,12 @@ class CParser(Parser):
             else:
                 raise Exception("Variable '"+p.ID+"' undefined") 
         
+
+
+
+
+
+
 
 
     
