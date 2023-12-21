@@ -96,7 +96,19 @@ class BinaryNode():
             self.value+="pushl "+p2+"\n"
             self.value+="Call scanf\n"
             self.value+="addl $"+str((vars+1)*4)+",%esp\n"
-                
+        elif (op=='fcall'):
+            if(not p2):
+                if(len(parser.Table[p1][1]) == 0):
+                    self.value="Call "+p1+"\n"
+                else:
+                    raise Exception("Incorrect parameters when calling: " + p1)
+            elif(len(p2)==len(parser.Table[p1][1])):
+                self.value = ""
+                for iarg in reversed(range(len(p2))):
+                    self.value+= str(p2[iarg])+"pushl %eax\n"
+                self.value+="Call "+p1+"\naddl $"+str(len(p2)*4)+",%esp\n"
+            else:
+                raise Exception("Incorrect parameters when calling: " + p1)    
 
             
 
@@ -202,6 +214,7 @@ class CParser(Parser):
     def emptymain(self,p):
         self.ambito="main"
         self.Table[self.ambito]=["int",dict()]
+        print(f".text\n.globl main\n.type main, @function\nmain:\n\n")
         print("pushl %ebp   #"+self.ambito+" PROLOGUE")
         print("movl %esp, %ebp\n")
         pass
@@ -237,8 +250,9 @@ class CParser(Parser):
         #function prologue
         self.ebpOffsetArg += 4
         self.ambito=p[-1]
-        self.Table[self.ambito]=[p[-2], dict(), self.ebpOffsetArg]
-        print("pushl %ebp   #"+self.ambito+" PROLOGUE")
+        self.Table[self.ambito]=[p[-1], dict(), self.ebpOffsetArg]
+        print(f".text\n.globl {p[-1]}\n.type {p[-1]}, @function\n{p[-1]}:\n\n")
+        print("pushl %ebp   #"+self.ambito+" PROLOGUE\n")
         print("movl %esp, %ebp\n")
         return p[-2]
         
@@ -439,16 +453,9 @@ class CParser(Parser):
 
     @_('ID "(" FARGS ")"')
     def FCALL(self,p):
+        id=p.ID
         L=(p.FARGS)
-        if(not L):
-            if(len(self.Table[p.ID][1]) == 0):
-                return "Call "+p.ID+"\n"
-        elif(len(L)==len(self.Table[p.ID][1])):
-            returnstr = ""
-            for iarg in reversed(range(len(L))):
-                returnstr += str(L[iarg])+"pushl %eax\n"
-            return returnstr+"Call "+p.ID+"\naddl $"+str(len(L)*4)+",%esp\n"
-        raise Exception("Incorrect parameters when calling: " + p.ID)
+        return BinaryNode("fcall",id,L,self).value
 
     @_('FARG RFARGS' )
     def FARGS(self,p):
