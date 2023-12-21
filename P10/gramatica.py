@@ -69,7 +69,36 @@ class BinaryNode():
         elif(op=='while'):
             self.value = f"start{NE}:\n{p1}cmpl $0,%eax\nje final{NE}\n{p2}jmp start{NE}\nfinal{NE}:\n"
             NE += 1
+        elif(op=='print'):
+            self.value=""
+            percents=p2.count("%d")
+            if(p1):
+                vars=len(p1)
+            else:
+                vars = 0
+                L = []
+            if(vars!=percents): 
+                raise Exception("Too many variables in printf")
+            else:
+                for var in p1:
+                        self.value+=var+" \n pushl %eax\n"
+                self.value+="pushl "+p2+"\n"
+                self.value+="Call printf\n"
+                self.value+="addl $"+str((vars+1)*4)+",%esp\n"
+        elif(op=='scanf'):
+            self.value=""
+            percents=p2.count("%d")
+            vars=len(p1)
+            if vars!=percents:
+                raise Exception("Too many variables in scanf")
+            for var in p1:
+                self.value+=var+" \n pushl %eax\n"
+            self.value+="pushl "+p2+"\n"
+            self.value+="Call scanf\n"
+            self.value+="addl $"+str((vars+1)*4)+",%esp\n"
+                
 
+            
 
 
 class UnaryNode():
@@ -167,7 +196,7 @@ class CParser(Parser):
     ##
     @_('S2 TYPE emptymain MAIN "(" ")" "{" LINES "}"')
     def S(self,p):
-        pass
+        print(p.LINES)
 
     @_("")
     def emptymain(self,p):
@@ -197,11 +226,11 @@ class CParser(Parser):
 
     @_('TYPE ID emptyF1 "(" ARGS ")" "{" LINES "}" emptyF2')
     def FUNCTION(self,p):
-        pass
+        print(p.LINES)
 
     @_('VOIDTYPE ID emptyF1 "(" ARGS ")" "{" LINES "}" emptyF2')
     def FUNCTION(self,p):
-        pass
+        print(p.LINES)
 
     @_('')
     def emptyF1(self,p):
@@ -294,7 +323,7 @@ class CParser(Parser):
 
     
 
-    @_('LINES LINE ";"')                        #S = S line ';'
+    @_('LINES LINE')                        #S = S line ';'
     def LINES(self, p):
         return str(p.LINES) + str(p.LINE)
 
@@ -306,50 +335,32 @@ class CParser(Parser):
     ##
     ## MAIN INPUT
     ##
-    @_('INSTR')                        #LINE = instr
+    @_('INSTR ";"')                        #LINE = instr
     def LINE(self, p):
-        print(p.INSTR)
         return p.INSTR
 
-    @_('DECLAR')                        #LINE = declar
+    @_('DECLAR ";"')                        #LINE = declar
     def LINE(self, p):
-        print(p.DECLAR)
         return p.DECLAR
 
     #RETURN
     #Return statements of the form: return a=2; are not considered,the output of this type of statements will be incorrect if used
-    @_('RETURN INSTR')
+    @_('RETURN INSTR ";"')
     def LINE(self, p):
-        print("#Save return value in %eax\n" + str(p.INSTR))
-        print("movl %ebp %esp   #"+self.ambito+" EPILOGUE")
-        print("popl %ebp")
-        print("ret\n")
-        pass
+        return f"#Save return value in %eax\n{str(p.INSTR)}\nmovl %ebp %esp #{self.ambito} EPILOGUE\npopl %ebp\nret\n"
 
-    @_('RETURN')
+    @_('RETURN ";"')
     def LINE(self, p):
-        print("movl %ebp %esp   #"+self.ambito+" EPILOGUE")
-        print("popl %ebp")
-        print("ret\n")
-        pass
+        return f"movl %ebp %esp #{self.ambito} EPILOGUE\npopl %ebp\nret\n"
         
 
     ##SCANF
-    @_('SCANF "(" STRING SCANIDS ")"')
+    @_('SCANF "(" STRING SCANIDS ")" ";"')
     def LINE(self,p):
         L=list()
         L=p.SCANIDS
-        percents=p.STRING.count("%d")
-        vars=len(L)
-        for var in L:
-            print(var+" \n pushl %eax\n")
-        print("pushl "+p.STRING)
-        print("Call scanf")
-        print("addl $"+str((vars+1)*4)+",%esp")
-        if vars==percents:
-           pass
-        else:
-            raise Exception("Too many variables in scanf")         
+        s=p.STRING
+        return BinaryNode("scanf", L, s).value         
             
     @_(", REFERENCE SCANIDS ")
     def SCANIDS(self,p):
@@ -365,25 +376,13 @@ class CParser(Parser):
 
 
     ##PRINTF
-    @_('PRINT "(" STRING PRINTIDS ")"')
+    @_('PRINT "(" STRING PRINTIDS ")" ";"')
     def LINE(self, p):
         L=list()
         L=p.PRINTIDS
-        percents=p.STRING.count("%d")
-        if(L):
-            vars=len(L)
-        else:
-            vars = 0
-            L = []
-        if(vars!=percents): 
-            raise Exception("Too many variables in printf")
-        else:
-            s=p.STRING
-            for var in L:
-                print(var+" \n pushl %eax\n")
-            print("pushl "+p.STRING)
-            print("Call printf")
-            print("addl $"+str((vars+1)*4)+",%esp")
+        s=p.STRING
+        return BinaryNode("print",L,s).value
+           
     
     @_('"," INSTR PRINTIDS')
     def PRINTIDS(self,p):
@@ -418,7 +417,6 @@ class CParser(Parser):
     #while statements must use {} and end with ";".
     @_('WHILE "(" OROP ")" "{" LINES "}"')
     def LINE(self,p):
-        print(BinaryNode("while",p.OROP,p.LINES).value)
         return BinaryNode("while",p.OROP,p.LINES).value
 
 
