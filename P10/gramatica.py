@@ -51,7 +51,7 @@ class BinaryNode():
         elif(op=='asig'):
             try:
                 ebpoffset = parser.Table[parser.ambito][1][p1][1]
-                self.value = p2+"movl %eax, " + str(ebpoffset) + "(%ebp)\n"
+                self.value = f"{p2}movl %eax, {ebpoffset}(%ebp)\n"
             except:
                 self.value =p2+"movl %eax, " + p1+"\n"
 
@@ -59,7 +59,7 @@ class BinaryNode():
         ##Declaration
         ##
         elif(op=='declar'):
-            self.value = "subl $"+str(-1*parser.ebpOffset)+", %esp\n"+p2
+            self.value = f"subl ${-1*parser.ebpOffset}, %esp\n{p2}"
 
 
         elif(op=='if'):
@@ -84,7 +84,7 @@ class BinaryNode():
                         self.value+=var+" \n pushl %eax\n"
                 self.value+="pushl "+p2+"\n"
                 self.value+="Call printf\n"
-                self.value+="addl $"+str((vars+1)*4)+",%esp\n"
+                self.value+=f"addl ${(vars+1)*4},%esp\n"
         elif(op=='scanf'):
             self.value=""
             percents=p2.count("%d")
@@ -95,7 +95,7 @@ class BinaryNode():
                 self.value+=var+" \n pushl %eax\n"
             self.value+="pushl "+p2+"\n"
             self.value+="Call scanf\n"
-            self.value+="addl $"+str((vars+1)*4)+",%esp\n"
+            self.value+=f"addl ${(vars+1)*4},%esp\n"
         elif (op=='fcall'):
             if(not p2):
                 if(len(parser.Table[p1][1]) == 0):
@@ -105,8 +105,8 @@ class BinaryNode():
             elif(len(p2)==len(parser.Table[p1][1])):
                 self.value = ""
                 for iarg in reversed(range(len(p2))):
-                    self.value+= str(p2[iarg])+"pushl %eax\n"
-                self.value+="Call "+p1+"\naddl $"+str(len(p2)*4)+",%esp\n"
+                    self.value+= f"{p2[iarg]}pushl %eax\n"
+                self.value+=f"Call {p1}\naddl ${len(p2)*4},%esp\n"
             else:
                 raise Exception("Incorrect parameters when calling: " + p1)    
 
@@ -339,7 +339,7 @@ class CParser(Parser):
 
     @_('LINES LINE')                        #S = S line ';'
     def LINES(self, p):
-        return str(p.LINES) + str(p.LINE)
+        return f"{p.LINES}{p.LINE}"
 
     @_('')                                  #S = epsilon
     def LINES(self,p):
@@ -361,7 +361,7 @@ class CParser(Parser):
     #Return statements of the form: return a=2; are not considered,the output of this type of statements will be incorrect if used
     @_('RETURN INSTR ";"')
     def LINE(self, p):
-        return f"#Save return value in %eax\n{str(p.INSTR)}\nmovl %ebp %esp #{self.ambito} EPILOGUE\npopl %ebp\nret\n"
+        return f"#Save return value in %eax\n{p.INSTR}\nmovl %ebp %esp #{self.ambito} EPILOGUE\npopl %ebp\nret\n"
 
     @_('RETURN ";"')
     def LINE(self, p):
@@ -675,7 +675,7 @@ class CParser(Parser):
 
     @_('NUMBER')                            #val = NUMBER
     def VAL(self,p):
-        return "movl $("+str(p.NUMBER)+"), %eax\n"
+        return f"movl $({p.NUMBER}), %eax\n"
 
     @_('NUMBERF')                            #val = NUMBERF
     def VAL(self,p):
@@ -688,10 +688,10 @@ class CParser(Parser):
     @_('ID')                                #val = ID
     def VAL(self,p):
         try:
-            return "movl "+str(+self.Table[self.ambito][1][p.ID][1])+"(%ebp),%eax\n"
+            return f"movl {+self.Table[self.ambito][1][p.ID][1]}(%ebp),%eax\n"
         except:
             if(p.ID in self.GlobalTable):
-                return "movl "+str(p.ID)+", %eax\n"
+                return f"movl {p.ID}, %eax\n"
             else:
                 raise Exception("Variable '"+p.ID+"' undefined") 
     @_('REFERENCE')
@@ -701,10 +701,10 @@ class CParser(Parser):
     @_('"&" ID')
     def REFERENCE(self,p):
         try:
-            return "leal "+str(self.Table[self.ambito][1][p.ID][1])+"(%ebp),%eax\n"
+            return f"leal {self.Table[self.ambito][1][p.ID][1]}(%ebp),%eax\n"
         except:
             if(p.ID in self.GlobalTable):
-                return "leal "+str(p.ID)+", %eax\n"
+                return f"leal {p.ID}, %eax\n"
             else:
                 raise Exception("Variable '"+p.ID+"' undefined") 
         
