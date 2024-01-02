@@ -69,6 +69,7 @@ class BinaryNode():
         elif(op=='while'):
             self.value = f"start{NE}:\n{p1}cmpl $0,%eax\nje final{NE}\n{p2}jmp start{NE}\nfinal{NE}:\n"
             NE += 1
+
         elif(op=='print'):
             self.value=""
             percents=p2.count("%d")
@@ -85,6 +86,7 @@ class BinaryNode():
                 self.value+="pushl "+p2+"\n"
                 self.value+="Call printf\n"
                 self.value+=f"addl ${(vars+1)*4},%esp\n"
+
         elif(op=='scanf'):
             self.value=""
             percents=p2.count("%d")
@@ -96,21 +98,33 @@ class BinaryNode():
             self.value+="pushl "+p2+"\n"
             self.value+="Call scanf\n"
             self.value+=f"addl ${(vars+1)*4},%esp\n"
-        elif (op=='fcall'):
-            if(not p2):
-                if(len(parser.Table[p1][1]) == 0):
-                    self.value="Call "+p1+"\n"
-                else:
-                    raise Exception("Incorrect parameters when calling: " + p1)
-            elif(len(p2)==len(parser.Table[p1][1])):
-                self.value = ""
-                for iarg in reversed(range(len(p2))):
-                    self.value+= f"{p2[iarg]}pushl %eax\n"
-                self.value+=f"Call {p1}\naddl ${len(p2)*4},%esp\n"
-            else:
-                raise Exception("Incorrect parameters when calling: " + p1)    
 
-            
+        elif (op=='fcall'):
+            parameters = getParameters(parser.Table[p1][1])
+            print("p1: "+str(p1))
+            print(str(p2[0]) + " ----- " + str(parameters))
+            if(p2[0] != parameters):
+                raise Exception("Incorrect parameters when calling: " + p1)  
+
+            if(not p2):
+                self.value="Call "+p1+"\n"
+            else:
+                self.value = ""
+                for iarg in reversed(range(len(p2[1]))):
+                    self.value+= f"{p2[1][iarg]}pushl %eax\n"
+                self.value+=f"Call {p1}\naddl ${len(p2[1])*4},%esp\n"
+
+
+#returns a list of the parameter types
+def getParameters(variables):
+    parameters = []
+    for var in variables:
+        if(variables[var][1]>=8):
+            parameters.append(variables[var][0])
+
+    return parameters
+
+        
 
 
 class UnaryNode():
@@ -213,6 +227,7 @@ class CParser(Parser):
     @_("")
     def emptymain(self,p):
         self.ambito="main"
+        self.ebpOffset = 0
         self.Table[self.ambito]=["int",dict()]
         print(f".text\n.globl main\n.type main, @function\nmain:\n\n")
         print("pushl %ebp   #"+self.ambito+" PROLOGUE")
@@ -250,9 +265,10 @@ class CParser(Parser):
         #function prologue
         self.ebpOffsetArg += 4
         self.ambito=p[-1]
+        self.ebpOffset = 0
         self.Table[self.ambito]=[p[-1], dict(), self.ebpOffsetArg]
         print(f".text\n.globl {p[-1]}\n.type {p[-1]}, @function\n{p[-1]}:\n\n")
-        print("pushl %ebp   #"+self.ambito+" PROLOGUE\n")
+        print("pushl %ebp   #"+self.ambito+" PROLOGUE")
         print("movl %esp, %ebp\n")
         return p[-2]
         
@@ -315,24 +331,23 @@ class CParser(Parser):
     def RARGS(self,p):
         pass
 
-    # Para aceptar paso por referencia (aceptar, de semantica ni idea) ver si se
-    # puede reutilizar la regla POINTERS de mas abajo
     @_('"*" REF')
     def REF(self,p):
-        pass
+        return "*" + p.REF
 
     @_('')
     def REF(self,p):
-        pass
+        return ""
 
 
 
     @_('ID')
     def ARG(self,p):
         try:
-            self.Table[self.ambito][1][p.ID]=[p[-3], self.ebpOffsetArg]
+            self.ebpOffsetArg += 4
+            self.Table[self.ambito][1][p.ID]=[p[-3]+p[-2], self.ebpOffsetArg]
         except (KeyError):
-            self.GlobalTable[p.ID] = p[-3]
+            self.GlobalTable[p.ID] = p[-3]+p[-2]
         return 
 
     
@@ -358,7 +373,8 @@ class CParser(Parser):
         return p.DECLAR
 
     #RETURN
-    #Return statements of the form: return a=2; are not considered,the output of this type of statements will be incorrect if used
+    #Return statements of the form: return a=2; are not considered,they may be accepted by the grammar, but their output will be incorrect
+    #All functions must have a return statement (even void functions), if not, function epilogue wont be included in the output
     @_('RETURN INSTR ";"')
     def LINE(self, p):
         return f"#Save return value in %eax\n{p.INSTR}\nmovl %ebp %esp #{self.ambito} EPILOGUE\npopl %ebp\nret\n"
@@ -416,8 +432,8 @@ class CParser(Parser):
     @_('IF "(" OROP ")" "{" LINES "}" ELSERULE')
     def LINE(self,p):
         L=[p.LINES,p.ELSERULE]
-        print(BinaryNode("if",p.OROP,L,self).value)
-        return BinaryNode("if",p.OROP,L,self).value
+        print(BinaryNode("if",p.OROP[1],L,self).value)
+        return BinaryNode("if",p.OROP[1],L,self).value
     @_('ELSE "{" LINES "}"')
     def ELSERULE(self,p):
         return p.LINES
@@ -431,7 +447,7 @@ class CParser(Parser):
     #while statements must use {} and end with ";".
     @_('WHILE "(" OROP ")" "{" LINES "}"')
     def LINE(self,p):
-        return BinaryNode("while",p.OROP,p.LINES).value
+        return BinaryNode("while",p.OROP[1],p.LINES).value
 
 
 
@@ -444,7 +460,7 @@ class CParser(Parser):
 
     @_('OROP')                              #instr = orOp
     def INSTR(self,p):
-        return p.OROP
+        return p.OROP[1]
         
     @_('FCALL')
     def INSTR(self,p):
@@ -459,10 +475,13 @@ class CParser(Parser):
 
     @_('FARG RFARGS' )
     def FARGS(self,p):
-        L=[]
-        L.append(p.FARG)      
-        L += p.RFARGS
-        return L
+        types = [p.FARG[0]]
+        parameters = [p.FARG[1]]
+        if(p.RFARGS):
+            types+=p.RFARGS[0]
+            parameters += p.RFARGS[1]
+        
+        return [types, parameters]
     
     @_('')
     def FARGS(self,p):
@@ -470,11 +489,13 @@ class CParser(Parser):
 
     @_('"," FARG RFARGS')
     def RFARGS(self,p):
-        L=[]
-        L.append(p.FARG)
-        
-        L += p.RFARGS
-        return L
+        types = [p.FARG[0]]
+        parameters = [p.FARG[1]]
+        if(p.RFARGS):
+            types+=p.RFARGS[0]
+            parameters += p.RFARGS[1]
+
+        return [types, parameters]
         
     @_('')
     def RFARGS(self,p):
@@ -482,7 +503,7 @@ class CParser(Parser):
 
     @_('VAL')
     def FARG(self,p):
-        return p.VAL  
+        return p.VAL
 
     #DECLARATIONS
     @_('TYPE POINTERS IDPRIMA')
@@ -586,9 +607,10 @@ class CParser(Parser):
     ##
     @_('OROP ORSIMB ANDOP')                 #orOp = orOp '||' andOp
     def OROP(self,p):
-        #res = 1 if (p.OROP or p.ANDOP) else 0 #in order to return 1 if or is done with values > 1
-        return BinaryNode("or",p.OROP,p.ANDOP).value
-        
+        if(p.OROP[0] == p.ANDOP[0]):
+            return (p.OROP[0], BinaryNode("or",p.OROP[1],p.ANDOP[1]).value)
+        else:
+            raise Exception("Incorrect types when doing OR operation")
 
     @_('ANDOP')                             #orOp = andOp
     def OROP(self,p):
@@ -597,8 +619,10 @@ class CParser(Parser):
 
     @_('ANDOP ANDSIMB NOTOP')               #andOp = andOp '&&' notOp
     def ANDOP(self,p):
-        return BinaryNode("and", p.ANDOP, p.NOTOP).value
-        #return (p.ANDOP and p.NOTOP) and 1 #in order to return 1 if and is done with values > 1
+        if(p.ANDOP[0] == p.NOTOP[0]):
+            return BinaryNode("and", p.ANDOP[1], p.NOTOP[1]).value
+        else:
+            raise Exception("Incorrect types when doing AND operation")
 
     @_('NOTOP')                             #andOp = notOp
     def ANDOP(self,p):
@@ -607,8 +631,7 @@ class CParser(Parser):
 
     @_('"!" NOTOP')                         #notOp = '!' notOp
     def NOTOP(self,p):
-        return UnaryNode("not", p.NOTOP).value
-        #return not p.NOTOP
+        return (p.NOTOP[0], UnaryNode("not", p.NOTOP[1]).value)
 
     @_('COMPOP')                            #notOp = compOp
     def NOTOP(self,p):
@@ -617,7 +640,10 @@ class CParser(Parser):
 
     @_('COMPOP COMPSIMB ADDOP')             #compOp = compOp compSimb addOp
     def COMPOP(self,p):
-        return BinaryNode(p.COMPSIMB, p.COMPOP, p.ADDOP).value
+        if(p.COMPOP[0] == p.ADDOP[0]):
+            return (p.COMPOP[0], BinaryNode(p.COMPSIMB, p.COMPOP[1], p.ADDOP[1]).value)
+        else:
+            raise Exception("Incorrect types when doing comparison")
 
     @_('ADDOP')                             #compOp = addOp
     def COMPOP(self,p):
@@ -626,34 +652,37 @@ class CParser(Parser):
 
     @_('ADDOP "+" PRODOP')                  #addOp = addOp + prodOp
     def ADDOP(self,p):
-        
-        return BinaryNode('+', p.ADDOP, p.PRODOP).value
-        #return p.ADDOP + p.PRODOP
+        if(p.ADDOP[0] == p.PRODOP[0]):
+            return (p.ADDOP[0], BinaryNode('+', p.ADDOP[1], p.PRODOP[1]).value)
+        else:
+            raise Exception("Incorrect types when doing sum")
 
     @_('ADDOP "-" PRODOP')                  #addOp = addOp - prodOp
     def ADDOP(self,p):
-        
-        return BinaryNode('-', p.ADDOP, p.PRODOP).value
-        #return p.ADDOP-p.PRODOP
+        if(p.ADDOP[0] == p.PRODOP[0]):
+            return (p.ADDOP[0], BinaryNode('-', p.ADDOP[1], p.PRODOP[1]).value)
+        else:
+            raise Exception("Incorrect types when doing substraction")
 
     @_('PRODOP')                            #addOp = prodOp
     def ADDOP(self,p):
-        
         return p.PRODOP
 
 
     @_('PRODOP "*" PAROP')                  #prodOp = prodOp * parOp
     def PRODOP(self,p):
-        
-        return BinaryNode('*', p.PRODOP, p.PAROP).value
-        #return p.PRODOP * p.PAROP
+        if(p.PRODOP[0] == p.PAROP[0]):
+            return (p.PRODOP[0], BinaryNode('*', p.PRODOP[1], p.PAROP[1]).value)
+        else:
+            raise Exception("Incorrect types when doing product")
 
     @_('PRODOP "/" PAROP')                  #prodOp = prodOp / parOp
     def PRODOP(self,p):
-        
-        return BinaryNode('/', p.PRODOP, p.PAROP).value
-        #return p.PRODOP / p.PAROP
-        
+        if(p.PRODOP[0] == p.PAROP[0]):
+            return (p.PRODOP[0], BinaryNode('/', p.PRODOP[1], p.PAROP[1]).value)
+        else:
+            raise Exception("Incorrect types when doing division")
+
     ##
     ## PARENTHESES
     ## 
@@ -675,25 +704,26 @@ class CParser(Parser):
 
     @_('NUMBER')                            #val = NUMBER
     def VAL(self,p):
-        return f"movl $({p.NUMBER}), %eax\n"
+        return ("int", f"movl $({p.NUMBER}), %eax\n")
 
     @_('NUMBERF')                            #val = NUMBERF
     def VAL(self,p):
-        return p.NUMBERF
+        return ("float", p.NUMBERF)
 
     @_('CHAR')                            #val = CHAR
     def VAL(self,p):
-        return p.CHAR
+        return ("char", p.CHAR)
 
     @_('ID')                                #val = ID
     def VAL(self,p):
         try:
-            return f"movl {+self.Table[self.ambito][1][p.ID][1]}(%ebp),%eax\n"
+            return (self.Table[self.ambito][1][p.ID][0],f"movl {+self.Table[self.ambito][1][p.ID][1]}(%ebp),%eax\n")
         except:
             if(p.ID in self.GlobalTable):
-                return f"movl {p.ID}, %eax\n"
+                return (self.GlobalTable[p.ID], f"movl {p.ID}, %eax\n")
             else:
                 raise Exception("Variable '"+p.ID+"' undefined") 
+
     @_('REFERENCE')
     def VAL(self,p):
         return p.REFERENCE
@@ -701,10 +731,10 @@ class CParser(Parser):
     @_('"&" ID')
     def REFERENCE(self,p):
         try:
-            return f"leal {self.Table[self.ambito][1][p.ID][1]}(%ebp),%eax\n"
+            return (self.Table[self.ambito][1][p.ID][0]+"*", f"leal {self.Table[self.ambito][1][p.ID][1]}(%ebp),%eax\n")
         except:
             if(p.ID in self.GlobalTable):
-                return f"leal {p.ID}, %eax\n"
+                return (self.GlobalTable[p.ID]+"*", f"leal {p.ID}, %eax\n")
             else:
                 raise Exception("Variable '"+p.ID+"' undefined") 
         
