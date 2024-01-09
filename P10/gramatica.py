@@ -1,6 +1,7 @@
 from sly import Lexer
 from sly import Parser
 NE=1 #Current tag number
+codeText = ""
 
 class BinaryNode():
     def __init__(self, op, p1, p2, parser=None):
@@ -205,7 +206,8 @@ class CLexer(Lexer):
         self.lineno += t.value.count('\n')
 
     def error(self, t):
-        print('Line %d: Bad character %r' % (self.lineno, t.value[0]))
+        global codeText
+        codeText += 'Line %d: Bad character %r' % (self.lineno, t.value[0])
         self.index += 1
         
 
@@ -234,16 +236,18 @@ class CParser(Parser):
     ##
     @_('S2 TYPE emptymain MAIN "(" ")" "{" LINES "}"')
     def S(self,p):
-        print(p.LINES)
+        global codeText
+        codeText += str(p.LINES) + "\n"
 
     @_("")
     def emptymain(self,p):
         self.ambito="main"
         self.ebpOffset = 0
         self.Table[self.ambito]=["int",dict()]
-        print(f".text\n.globl main\n.type main, @function\nmain:\n\n")
-        print("pushl %ebp   #"+self.ambito+" PROLOGUE")
-        print("movl %esp, %ebp\n")
+        global codeText
+        codeText += f".text\n.globl main\n.type main, @function\nmain:\n\n\n"
+        codeText += "pushl %ebp   #"+self.ambito+" PROLOGUE"+"\n"
+        codeText += "movl %esp, %ebp\n\n"
         pass
         
     @_('S2 FUNCTION')
@@ -266,11 +270,13 @@ class CParser(Parser):
 
     @_('TYPE ID emptyF1 "(" ARGS ")" "{" LINES "}" emptyF2')
     def FUNCTION(self,p):
-        print(p.LINES)
+        global codeText
+        codeText += str(p.LINES) + "\n"
 
     @_('VOIDTYPE ID emptyF1 "(" ARGS ")" "{" LINES "}" emptyF2')
     def FUNCTION(self,p):
-        print(p.LINES)
+        global codeText
+        codeText += str(p.LINES) + "\n"
 
     @_('')
     def emptyF1(self,p):
@@ -279,9 +285,10 @@ class CParser(Parser):
         self.ambito=p[-1]
         self.ebpOffset = 0
         self.Table[self.ambito]=[p[-2], dict(), self.ebpOffsetArg]
-        print(f".text\n.globl {p[-1]}\n.type {p[-1]}, @function\n{p[-1]}:\n\n")
-        print("pushl %ebp   #"+self.ambito+" PROLOGUE")
-        print("movl %esp, %ebp\n")
+        global codeText
+        codeText += f".text\n.globl {p[-1]}\n.type {p[-1]}, @function\n{p[-1]}:\n\n\n"
+        codeText += "pushl %ebp   #"+self.ambito+" PROLOGUE" + "\n"
+        codeText += "movl %esp, %ebp\n\n"
         return p[-2]
         
     @_('')
@@ -761,6 +768,11 @@ if __name__ == '__main__':
     print("")
 
     result = parser.parse(lexer.tokenize(text))
+    #WRITE TO ASM FILE
+    file = open("output.asm", "w")
+    file.write(codeText)
+    file.close()
+    print("Translated code exported to \"output.asm\"")
     print("Global variables table: "+ str(parser.GlobalTable))
     print("Function variables table: " + str(parser.Table))
     #except Exception as e:
