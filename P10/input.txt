@@ -3,12 +3,12 @@ int h;
 int factorial(int a, int* b){
     int y = 2;
     a = a+7;
-    b = a+3;
 }
 
 
 int main(){
-    int x = 4;
-    return factorial(1,&h);
+    int b = 2;
+    int x = factorial(1, &h);
+    return 0;
 }
 

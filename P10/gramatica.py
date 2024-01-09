@@ -101,8 +101,6 @@ class BinaryNode():
 
         elif (op=='fcall'):
             parameters = getParameters(parser.Table[p1][1])
-            print("p1: "+str(p1))
-            print(str(p2[0]) + " ----- " + str(parameters))
             if(p2[0] != parameters):
                 raise Exception("Incorrect parameters when calling: " + p1)  
 
@@ -135,6 +133,20 @@ class UnaryNode():
 
 
 
+class intNode():
+    def __init__(self, type,data):
+        self.type=type
+        self.data=data
+        
+def TypeChecker(t1,t2):
+    if(t1==t2):
+        return t1
+    else:
+        raise Exception("Incompatible type")
+                  
+
+
+    
 
 
 
@@ -167,14 +179,14 @@ class CLexer(Lexer):
 
     ignore_newline = r'\n+'
 
-    @_(r'\d+')
-    def NUMBER(self, t):
-        t.value = int(t.value)
-        return t
-
     @_(r'\d.\d+')
     def NUMBERF(self, t):
         t.value = float(t.value)
+        return t
+
+    @_(r'\d+')
+    def NUMBER(self, t):
+        t.value = int(t.value)
         return t
 
     @_(r'\'[a-z]\'')
@@ -266,7 +278,7 @@ class CParser(Parser):
         self.ebpOffsetArg += 4
         self.ambito=p[-1]
         self.ebpOffset = 0
-        self.Table[self.ambito]=[p[-1], dict(), self.ebpOffsetArg]
+        self.Table[self.ambito]=[p[-2], dict(), self.ebpOffsetArg]
         print(f".text\n.globl {p[-1]}\n.type {p[-1]}, @function\n{p[-1]}:\n\n")
         print("pushl %ebp   #"+self.ambito+" PROLOGUE")
         print("movl %esp, %ebp\n")
@@ -352,23 +364,25 @@ class CParser(Parser):
 
     
 
-    @_('LINES LINE')                        #S = S line ';'
+    @_('LINES LINE')
     def LINES(self, p):
         return f"{p.LINES}{p.LINE}"
 
-    @_('')                                  #S = epsilon
+    @_('')
     def LINES(self,p):
         return ""
+
+
 
 
     ##
     ## MAIN INPUT
     ##
-    @_('INSTR ";"')                        #LINE = instr
+    @_('INSTR ";"')
     def LINE(self, p):
         return p.INSTR
 
-    @_('DECLAR ";"')                        #LINE = declar
+    @_('DECLAR ";"')
     def LINE(self, p):
         return p.DECLAR
 
@@ -377,10 +391,12 @@ class CParser(Parser):
     #All functions must have a return statement (even void functions), if not, function epilogue wont be included in the output
     @_('RETURN INSTR ";"')
     def LINE(self, p):
+        TypeChecker(self.Table[self.ambito][0], p.INSTR[0])
         return f"#Save return value in %eax\n{p.INSTR}\nmovl %ebp %esp #{self.ambito} EPILOGUE\npopl %ebp\nret\n"
 
     @_('RETURN ";"')
     def LINE(self, p):
+        TypeChecker(self.Table[self.ambito][0], "void")
         return f"movl %ebp %esp #{self.ambito} EPILOGUE\npopl %ebp\nret\n"
         
 
@@ -454,13 +470,13 @@ class CParser(Parser):
     ##
     ## LANGUAJE INSTRUCTIONS
     ##
-    @_('ASIG')                              #instr = asig
+    @_('ASIG')
     def INSTR(self,p):
         return p.ASIG
 
-    @_('OROP')                              #instr = orOp
+    @_('OROP')
     def INSTR(self,p):
-        return p.OROP[1]
+        return p.OROP
         
     @_('FCALL')
     def INSTR(self,p):
@@ -471,7 +487,7 @@ class CParser(Parser):
     def FCALL(self,p):
         id=p.ID
         L=(p.FARGS)
-        return BinaryNode("fcall",id,L,self).value
+        return (self.Table[p.ID][0], BinaryNode("fcall",id,L,self).value)
 
     @_('FARG RFARGS' )
     def FARGS(self,p):
@@ -570,10 +586,11 @@ class CParser(Parser):
     def ELEM(self,p):
         valueType = p[-4]
         try:
+            valueType = TypeChecker(valueType, p.INSTR[0])
             self.Table[self.ambito][1][p.ID]= [valueType, self.ebpOffset]
         except (KeyError):
             self.GlobalTable[p.ID] = valueType
-        return BinaryNode("asig", p.ID, p.INSTR, self).value
+        return BinaryNode("asig", p.ID, p.INSTR[1], self).value
 
     #INHERITANCE SIMULATION
     @_('')
@@ -590,12 +607,12 @@ class CParser(Parser):
 
 
     #ASSIGNMENTS
-    @_('ID "=" INSTR')                 #asig = ID '=' instr
+    @_('ID "=" INSTR')
     def ASIG(self,p):
         if p.ID in self.Table[self.ambito][1]:
-            return BinaryNode("asig", p.ID, p.INSTR, self).value
+            return (TypeChecker(self.Table[self.ambito][1][p.ID][0], p.INSTR[0]), BinaryNode("asig", p.ID, p.INSTR[1], self).value)
         elif p.ID in  self.GlobalTable:
-            return BinaryNode("asig", p.ID, p.INSTR, self).value
+            return (TypeChecker(self.Table[self.ambito][1][p.ID][0], BinaryNode("asig", p.ID, p.INSTR[1], self).value))
         else:
             raise Exception("Variable '"+p.ID+"' undefined")
         
@@ -605,116 +622,97 @@ class CParser(Parser):
     ##
     ## ARITMETICAL OPERATIONS
     ##
-    @_('OROP ORSIMB ANDOP')                 #orOp = orOp '||' andOp
+    @_('OROP ORSIMB ANDOP')
     def OROP(self,p):
-        if(p.OROP[0] == p.ANDOP[0]):
-            return (p.OROP[0], BinaryNode("or",p.OROP[1],p.ANDOP[1]).value)
-        else:
-            raise Exception("Incorrect types when doing OR operation")
+        return (TypeChecker(p.OROP[0], p.ANDOP[0]), BinaryNode("or",p.OROP[1],p.ANDOP[1]).value)
 
-    @_('ANDOP')                             #orOp = andOp
+    @_('ANDOP')
     def OROP(self,p):
         return p.ANDOP
 
 
-    @_('ANDOP ANDSIMB NOTOP')               #andOp = andOp '&&' notOp
+    @_('ANDOP ANDSIMB NOTOP')
     def ANDOP(self,p):
-        if(p.ANDOP[0] == p.NOTOP[0]):
-            return BinaryNode("and", p.ANDOP[1], p.NOTOP[1]).value
-        else:
-            raise Exception("Incorrect types when doing AND operation")
+        return (TypeChecker(p.ANDOP[0], p.NOTOP[0]), BinaryNode("and", p.ANDOP[1], p.NOTOP[1]).value)
 
-    @_('NOTOP')                             #andOp = notOp
+    @_('NOTOP')
     def ANDOP(self,p):
         return p.NOTOP
 
 
-    @_('"!" NOTOP')                         #notOp = '!' notOp
+    @_('"!" NOTOP')
     def NOTOP(self,p):
         return (p.NOTOP[0], UnaryNode("not", p.NOTOP[1]).value)
 
-    @_('COMPOP')                            #notOp = compOp
+    @_('COMPOP')
     def NOTOP(self,p):
         return p.COMPOP
 
 
-    @_('COMPOP COMPSIMB ADDOP')             #compOp = compOp compSimb addOp
+    @_('COMPOP COMPSIMB ADDOP')
     def COMPOP(self,p):
-        if(p.COMPOP[0] == p.ADDOP[0]):
-            return (p.COMPOP[0], BinaryNode(p.COMPSIMB, p.COMPOP[1], p.ADDOP[1]).value)
-        else:
-            raise Exception("Incorrect types when doing comparison")
+            return (TypeChecker(p.COMPOP[0],p.COMPOP[0]), BinaryNode(p.COMPSIMB, p.COMPOP[1], p.ADDOP[1]).value)
+       
 
-    @_('ADDOP')                             #compOp = addOp
+    @_('ADDOP')
     def COMPOP(self,p):
         return p.ADDOP
 
 
-    @_('ADDOP "+" PRODOP')                  #addOp = addOp + prodOp
+    @_('ADDOP "+" PRODOP')
     def ADDOP(self,p):
-        if(p.ADDOP[0] == p.PRODOP[0]):
-            return (p.ADDOP[0], BinaryNode('+', p.ADDOP[1], p.PRODOP[1]).value)
-        else:
-            raise Exception("Incorrect types when doing sum")
+        return (TypeChecker(p.ADDOP[0], p.PRODOP[0]), BinaryNode('+', p.ADDOP[1], p.PRODOP[1]).value)
 
-    @_('ADDOP "-" PRODOP')                  #addOp = addOp - prodOp
+    @_('ADDOP "-" PRODOP')
     def ADDOP(self,p):
-        if(p.ADDOP[0] == p.PRODOP[0]):
-            return (p.ADDOP[0], BinaryNode('-', p.ADDOP[1], p.PRODOP[1]).value)
-        else:
-            raise Exception("Incorrect types when doing substraction")
+            return (TypeChecker(p.ADDOP[0], p.PRODOP[0]), BinaryNode('-', p.ADDOP[1], p.PRODOP[1]).value)
 
-    @_('PRODOP')                            #addOp = prodOp
+    @_('PRODOP')
     def ADDOP(self,p):
         return p.PRODOP
 
 
-    @_('PRODOP "*" PAROP')                  #prodOp = prodOp * parOp
+    @_('PRODOP "*" PAROP')
     def PRODOP(self,p):
-        if(p.PRODOP[0] == p.PAROP[0]):
-            return (p.PRODOP[0], BinaryNode('*', p.PRODOP[1], p.PAROP[1]).value)
-        else:
-            raise Exception("Incorrect types when doing product")
+        return (TypeChecker(p.PRODOP[0], p.PAROP[0]), BinaryNode('*', p.PRODOP[1], p.PAROP[1]).value)
 
-    @_('PRODOP "/" PAROP')                  #prodOp = prodOp / parOp
+    @_('PRODOP "/" PAROP')
     def PRODOP(self,p):
-        if(p.PRODOP[0] == p.PAROP[0]):
-            return (p.PRODOP[0], BinaryNode('/', p.PRODOP[1], p.PAROP[1]).value)
-        else:
-            raise Exception("Incorrect types when doing division")
+        return (TypeChecker(p.PRODOP[0], p.PAROP[0]), BinaryNode('/', p.PRODOP[1], p.PAROP[1]).value)
+
 
     ##
     ## PARENTHESES
     ## 
-    @_('PAROP')                             #prodOp = parOp
+    @_('PAROP')
     def PRODOP(self,p):
         return p.PAROP
 
 
-    @_('"(" OROP ")"')                      #parOp = (orOp)
+    @_('"(" OROP ")"')
     def PAROP(self,p):
         return p.OROP
 
     ##
     ## TERMINAL SYMBOLS
     ##
-    @_('VAL')                               #parOp = val
+    @_('VAL')
     def PAROP(self,p):
         return p.VAL
 
-    @_('NUMBER')                            #val = NUMBER
+    @_('NUMBER')
     def VAL(self,p):
         return ("int", f"movl $({p.NUMBER}), %eax\n")
 
-    @_('NUMBERF')                            #val = NUMBERF
+    @_('NUMBERF')
     def VAL(self,p):
         return ("float", p.NUMBERF)
 
-    @_('CHAR')                            #val = CHAR
+    @_('CHAR')
     def VAL(self,p):
         return ("char", p.CHAR)
 
-    @_('ID')                                #val = ID
+    @_('ID')
     def VAL(self,p):
         try:
             return (self.Table[self.ambito][1][p.ID][0],f"movl {+self.Table[self.ambito][1][p.ID][1]}(%ebp),%eax\n")
