@@ -317,7 +317,8 @@ class CParser(Parser):
     @_('ID "=" INSTR ";"')
     def GLOBALASIG(self,p):
         try:
-            value = p.INSTR
+            TypeChecker(self.Table[self.ambito][1][p.ID][0], p.INSTR[0])
+            value = p.INSTR[1]
             self.GlobalTable[p.ID] = value
         except:
             raise Exception("Variable '"+p.ID+"' undefined")
@@ -380,7 +381,7 @@ class CParser(Parser):
     ##
     @_('INSTR ";"')
     def LINE(self, p):
-        return p.INSTR
+        return p.INSTR[1]
 
     @_('DECLAR ";"')
     def LINE(self, p):
@@ -392,7 +393,7 @@ class CParser(Parser):
     @_('RETURN INSTR ";"')
     def LINE(self, p):
         TypeChecker(self.Table[self.ambito][0], p.INSTR[0])
-        return f"#Save return value in %eax\n{p.INSTR}\nmovl %ebp %esp #{self.ambito} EPILOGUE\npopl %ebp\nret\n"
+        return f"#Save return value in %eax\n{p.INSTR[1]}\nmovl %ebp %esp #{self.ambito} EPILOGUE\npopl %ebp\nret\n"
 
     @_('RETURN ";"')
     def LINE(self, p):
@@ -448,7 +449,7 @@ class CParser(Parser):
     @_('IF "(" OROP ")" "{" LINES "}" ELSERULE')
     def LINE(self,p):
         L=[p.LINES,p.ELSERULE]
-        print(BinaryNode("if",p.OROP[1],L,self).value)
+        #print(BinaryNode("if",p.OROP[1],L,self).value)
         return BinaryNode("if",p.OROP[1],L,self).value
     @_('ELSE "{" LINES "}"')
     def ELSERULE(self,p):
