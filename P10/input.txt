@@ -1,5 +1,4 @@
-int h = 4;
-
+int h,g,e;
 int factorial(int a, int* b){
     if(a != 0){
         a = 2;

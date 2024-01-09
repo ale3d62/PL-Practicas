@@ -1,3 +1,4 @@
+int h=4;
 int main(){
     int a = 2+4>=2;
 }

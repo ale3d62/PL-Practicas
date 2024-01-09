@@ -10,28 +10,28 @@ class BinaryNode():
         ##Logical operations
         ##
         if(op=='and'):
-            self.value=f"{p1}cmpl $0, %eax\n je Salto{NE}\n{p2}\n cmpl $0, %eax\n Salto:{NE}\n"
+            self.value=f";AND OPERAND\n{p1}cmpl $0, %eax\nje Salto{NE}\n{p2}\n cmpl $0, %eax\nSalto{NE}:\n;END AND OPERAND\n"
             NE += 1
         elif(op=='or'):
-            self.value=f"{p1}cmpl $0, %eax\n je Salto{NE}\n{p2}\n cmpl $0, %eax\n Salto:{NE}\n"
+            self.value=f";OR OPERAND\n{p1}cmpl $0, %eax\nje Salto{NE}\n{p2}\n cmpl $0, %eax\nSalto{NE}:\n;END OR OPERAND\n"
             NE += 1
         elif(op=='=='):
-            self.value=f"{p1}\npushl %eax\n{p2}\nmovl %eax,%ebx\npopl %eax\ncmpl %ebx,%eax\njne false{NE}\nmovl $1,%eax\nj final{NE}\nfalse{NE}:\nmovl $0,%eax\nfinal{NE}:\n"
+            self.value=f";EQ OPERAND\n{p1}\npushl %eax\n{p2}\nmovl %eax,%ebx\npopl %eax\ncmpl %ebx,%eax\njne false{NE}\nmovl $1,%eax\nj final{NE}\nfalse{NE}:\nmovl $0,%eax\nfinal{NE}:\n;END EQ OPERAND\n"
             NE += 1
         elif(op=='!='):
-            self.value=f"{p1}\npushl %eax\n{p2}\nmovl %eax,%ebx\npopl %eax\ncmpl %ebx,%eax\nje false{NE}\nmovl $1,%eax\nj final{NE}\nfalse{NE}:\nmovl $0,%eax\nfinal{NE}:\n"
+            self.value=f";NEQ OPERAND\n{p1}\npushl %eax\n{p2}\nmovl %eax,%ebx\npopl %eax\ncmpl %ebx,%eax\nje false{NE}\nmovl $1,%eax\nj final{NE}\nfalse{NE}:\nmovl $0,%eax\nfinal{NE}:\n;END NEQ OPERAND\n"
             NE += 1
         elif(op=='>='):
-            self.value=f"{p1}\npushl %eax\n{p2}\nmovl %eax,%ebx\npopl %eax\ncmpl %ebx,%eax\njl false{NE}\nmovl $1,%eax\nj final{NE}\nfalse{NE}:\nmovl $0,%eax\nfinal{NE}:\n"
+            self.value=f";GEQ OPERAND\n{p1}\npushl %eax\n{p2}\nmovl %eax,%ebx\npopl %eax\ncmpl %ebx,%eax\njl false{NE}\nmovl $1,%eax\nj final{NE}\nfalse{NE}:\nmovl $0,%eax\nfinal{NE}:\n;END GEQ OPERAND\n"
             NE += 1
         elif(op=='<='):
-            self.value=f"{p1}\npushl %eax\n{p2}\nmovl %eax,%ebx\npopl %eax\ncmpl %ebx,%eax\njg false{NE}\nmovl $1,%eax\nj final{NE}\nfalse{NE}:\nmovl $0,%eax\nfinal{NE}:\n"
+            self.value=f";LEQ OPERAND\n{p1}\npushl %eax\n{p2}\nmovl %eax,%ebx\npopl %eax\ncmpl %ebx,%eax\njg false{NE}\nmovl $1,%eax\nj final{NE}\nfalse{NE}:\nmovl $0,%eax\nfinal{NE}:\n;END LEQ OPERAND\n"
             NE += 1
         elif(op=='<'):
-            self.value=f"{p1}\npushl %eax\n{p2}\nmovl %eax,%ebx\npopl %eax\ncmpl %ebx,%eax\njge false{NE}\nmovl $1,%eax\nj final{NE}\nfalse{NE}:\nmovl $0,%eax\nfinal{NE}:\n"
+            self.value=f";L OPERAND\n{p1}\npushl %eax\n{p2}\nmovl %eax,%ebx\npopl %eax\ncmpl %ebx,%eax\njge false{NE}\nmovl $1,%eax\nj final{NE}\nfalse{NE}:\nmovl $0,%eax\nfinal{NE}:\n;END L OPERAND\n"
             NE += 1
         elif(op=='>'):
-           self.value=f"{p1}\npushl %eax\n{p2}\nmovl %eax,%ebx\npopl %eax\ncmpl %ebx,%eax\njle false{NE}\nmovl $1,%eax\nj final{NE}\nfalse{NE}:\nmovl $0,%eax\nfinal{NE}:\n"
+           self.value=f";G OPERAND;\n{p1}\npushl %eax\n{p2}\nmovl %eax,%ebx\npopl %eax\ncmpl %ebx,%eax\njle false{NE}\nmovl $1,%eax\nj final{NE}\nfalse{NE}:\nmovl $0,%eax\nfinal{NE}:\n;END G OPERAND\n"
            NE += 1
 
         ##
@@ -64,7 +64,7 @@ class BinaryNode():
 
 
         elif(op=='if'):
-            self.value = f"{p1}cmpl $0,%eax\nje false{NE}\n{p2[0]}jmp final{NE}\nfalse{NE}:\n{p2[1]}\nfinal{NE}:\n"
+            self.value = f";IF CODE\n{p1}cmpl $0,%eax\nje false{NE}\n{p2[0]}jmp final{NE}\nfalse{NE}:\n{p2[1]}\nfinal{NE}:\n"
             NE += 1
             
         elif(op=='while'):
@@ -143,7 +143,7 @@ def TypeChecker(t1,t2):
     if(t1==t2):
         return t1
     else:
-        raise Exception("Incompatible type")
+        raise Exception(f"Incompatible types: {t1} and {t2}")
                   
 
 
@@ -180,7 +180,7 @@ class CLexer(Lexer):
 
     ignore_newline = r'\n+'
 
-    @_(r'\d.\d+')
+    @_(r'\d+\.\d+')
     def NUMBERF(self, t):
         t.value = float(t.value)
         return t
@@ -258,9 +258,9 @@ class CParser(Parser):
     def S2(self,p):
         pass
 
-    @_('S2 GLOBALASIG')
-    def S2(self,p):
-        pass
+    # @_('S2 GLOBALASIG')
+    # def S2(self,p):
+    #     pass
     
     @_('')
     def S2(self,p):
@@ -299,10 +299,11 @@ class CParser(Parser):
 
 
     #--Global declarations--
-    @_('TYPE ELEM emptyglobal emptyaux RESTGLOBAL ";"') 
+    @_('TYPE ID emptyglobal RESTGLOBAL ";"') 
     def GLOBALDECLAR(self,p):
         pass
-    @_('"," emptyglobal2 ELEM RESTGLOBAL')
+        
+    @_('"," ID emptyglobal2 RESTGLOBAL')
     def RESTGLOBAL(self,p):
         pass
     @_('')
@@ -310,27 +311,30 @@ class CParser(Parser):
         pass
     @_('')
     def emptyglobal(self,p):
+        global codeText
+        codeText+=f".comm {p[-1]} 4 4\n"
+        self.GlobalTable[p[-1]]=p[-2]
         return p[-2]
     @_('')
     def emptyglobal2(self,p):
+        global codeText
+        codeText+=f".comm {p[-1]} 4 4\n"
+        self.GlobalTable[p[-1]]=p[-3]
         return p[-3]
-    @_('')
-    def emptyaux(self,p):
-        pass
 
 
 
-    #--Global assignments--
-    @_('ID "=" INSTR ";"')
-    def GLOBALASIG(self,p):
-        try:
-            TypeChecker(self.Table[self.ambito][1][p.ID][0], p.INSTR[0])
-            value = p.INSTR[1]
-            self.GlobalTable[p.ID] = value
-        except:
-            raise Exception("Variable '"+p.ID+"' undefined")
+    # #--Global assignments--
+    # @_('ID "=" INSTR ";"')
+    # def GLOBALASIG(self,p):
+    #     try:
+    #         TypeChecker(self.GlobalTable[p.ID], p.INSTR[0])
+    #         value = p.INSTR[1]
+    #         self.GlobalTable[p.ID] = value
+    #     except:
+    #         raise Exception("Variable '"+p.ID+"' undefined")
         
-        pass
+    #     pass
 
     
 
@@ -456,7 +460,6 @@ class CParser(Parser):
     @_('IF "(" OROP ")" "{" LINES "}" ELSERULE')
     def LINE(self,p):
         L=[p.LINES,p.ELSERULE]
-        #print(BinaryNode("if",p.OROP[1],L,self).value)
         return BinaryNode("if",p.OROP[1],L,self).value
     @_('ELSE "{" LINES "}"')
     def ELSERULE(self,p):
@@ -758,7 +761,7 @@ if __name__ == '__main__':
     parser = CParser()
     text = ""
     #try:
-    with open('input.txt',"r") as f:
+    with open('aritmetics.txt',"r") as f:
         text = f.read()
         f.close()
 
