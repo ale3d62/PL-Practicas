@@ -247,7 +247,7 @@ class CParser(Parser):
         self.Table[self.ambito]=["int",dict()]
         global codeText
         codeText += f".text\n.globl main\n.type main, @function\nmain:\n\n\n"
-        codeText += "pushl %ebp   #"+self.ambito+" PROLOGUE"+"\n"
+        codeText += "pushl %ebp   ;"+self.ambito+" PROLOGUE"+"\n"
         codeText += "movl %esp, %ebp\n\n"
         pass
         
@@ -284,7 +284,7 @@ class CParser(Parser):
         self.Table[self.ambito]=[p[-2], dict(), self.ebpOffsetArg]
         global codeText
         codeText += f".text\n.globl {p[-1]}\n.type {p[-1]}, @function\n{p[-1]}:\n\n\n"
-        codeText += "pushl %ebp   #"+self.ambito+" PROLOGUE" + "\n"
+        codeText += "pushl %ebp   ;"+self.ambito+" PROLOGUE" + "\n"
         codeText += "movl %esp, %ebp\n\n"
         return p[-2]
         
@@ -388,12 +388,12 @@ class CParser(Parser):
     @_('RETURN INSTR ";"')
     def LINE(self, p):
         TypeChecker(self.Table[self.ambito][0], p.INSTR[0])
-        return f"#Save return value in %eax\n{p.INSTR[1]}\nmovl %ebp %esp #{self.ambito} EPILOGUE\npopl %ebp\nret\n"
+        return f";Save return value in %eax\n{p.INSTR[1]}\nmovl %ebp %esp ;{self.ambito} EPILOGUE\npopl %ebp\nret\n"
 
     @_('RETURN ";"')
     def LINE(self, p):
         TypeChecker(self.Table[self.ambito][0], "void")
-        return f"movl %ebp %esp #{self.ambito} EPILOGUE\npopl %ebp\nret\n"
+        return f"movl %ebp %esp ;{self.ambito} EPILOGUE\npopl %ebp\nret\n"
         
 
     ##SCANF
@@ -749,23 +749,23 @@ if __name__ == '__main__':
     for archivo in archivos:
         print("- "+ archivo)
     namef=input("Escriba el nombre del fichero que quiere leer (sin la extension):")
-    #try:
-    with open("./Examples/"+namef+".c","r") as f:
-        text = f.read()
-        f.close()
+    try:
+        with open("./Examples/"+namef+".c","r") as f:
+            text = f.read()
+            f.close()
 
-    print("-----INPUT CODE-----")
-    print(text)
-    print("--------------------")
-    print("")
+        print("-----INPUT CODE-----")
+        print(text)
+        print("--------------------")
+        print("")
 
-    result = parser.parse(lexer.tokenize(text))
-    #WRITE TO ASM FILE
-    file = open(f"./ASM/{namef}.asm", "w")
-    file.write(codeText)
-    file.close()
-    print("Translated code exported to ASM/"+namef+".asm")
-    print("Global variables table: "+ str(parser.GlobalTable))
-    print("Function variables table: " + str(parser.Table))
-    #except Exception as e:
-    #    print("[ERROR] " + str(e))
+        result = parser.parse(lexer.tokenize(text))
+        #WRITE TO ASM FILE
+        file = open(f"./ASM/{namef}.asm", "w")
+        file.write(codeText)
+        file.close()
+        print("Translated code exported to ASM/"+namef+".asm")
+        #print("Global variables table: "+ str(parser.GlobalTable))
+        #print("Function variables table: " + str(parser.Table))
+    except Exception as e:
+        print("[ERROR] " + str(e))
