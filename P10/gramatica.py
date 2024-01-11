@@ -1,5 +1,6 @@
 from sly import Lexer
 from sly import Parser
+import os
 NE=1 #Current tag number
 codeText = ""
 
@@ -224,7 +225,7 @@ class CParser(Parser):
         self.vars = {}
     
     tokens = CLexer.tokens
-    debugfile='debug.txt'
+    #debugfile='debug.txt'
 
 
     #-------------------------------------------------
@@ -743,8 +744,13 @@ if __name__ == '__main__':
     lexer = CLexer()
     parser = CParser()
     text = ""
+    archivos = os.listdir("./Examples")
+    print("Lista de archivos en Examples:")
+    for archivo in archivos:
+        print("- "+ archivo)
+    namef=input("Escriba el nombre del fichero que quiere leer (sin la extension):")
     #try:
-    with open('input.txt',"r") as f:
+    with open("./Examples/"+namef+".c","r") as f:
         text = f.read()
         f.close()
 
@@ -755,10 +761,10 @@ if __name__ == '__main__':
 
     result = parser.parse(lexer.tokenize(text))
     #WRITE TO ASM FILE
-    file = open("output.asm", "w")
+    file = open(f"./ASM/{namef}.asm", "w")
     file.write(codeText)
     file.close()
-    print("Translated code exported to \"output.asm\"")
+    print("Translated code exported to ASM/"+namef+".asm")
     print("Global variables table: "+ str(parser.GlobalTable))
     print("Function variables table: " + str(parser.Table))
     #except Exception as e:
