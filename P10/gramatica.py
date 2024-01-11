@@ -64,11 +64,11 @@ class BinaryNode():
 
 
         elif(op=='if'):
-            self.value = f";IF CODE\n{p1}cmpl $0,%eax\nje false{NE}\n{p2[0]}jmp final{NE}\nfalse{NE}:\n{p2[1]}\nfinal{NE}:\n"
+            self.value = f";IF CODE\n{p1}cmpl $0,%eax\nje false{NE}\n{p2[0]}jmp final{NE}\nfalse{NE}:\n{p2[1]}\nfinal{NE}:\n;END IF CODE\n"
             NE += 1
             
         elif(op=='while'):
-            self.value = f"start{NE}:\n{p1}cmpl $0,%eax\nje final{NE}\n{p2}jmp start{NE}\nfinal{NE}:\n"
+            self.value = f";WHILE CODE\nstart{NE}:\n{p1}cmpl $0,%eax\nje final{NE}\n{p2}jmp start{NE}\nfinal{NE}:\n;END WHILE CODE\n"
             NE += 1
 
         elif(op=='print'):
@@ -257,10 +257,6 @@ class CParser(Parser):
     @_('S2 GLOBALDECLAR')
     def S2(self,p):
         pass
-
-    # @_('S2 GLOBALASIG')
-    # def S2(self,p):
-    #     pass
     
     @_('')
     def S2(self,p):
@@ -322,19 +318,6 @@ class CParser(Parser):
         self.GlobalTable[p[-1]]=p[-3]
         return p[-3]
 
-
-
-    # #--Global assignments--
-    # @_('ID "=" INSTR ";"')
-    # def GLOBALASIG(self,p):
-    #     try:
-    #         TypeChecker(self.GlobalTable[p.ID], p.INSTR[0])
-    #         value = p.INSTR[1]
-    #         self.GlobalTable[p.ID] = value
-    #     except:
-    #         raise Exception("Variable '"+p.ID+"' undefined")
-        
-    #     pass
 
     
 
@@ -423,7 +406,7 @@ class CParser(Parser):
     @_(", REFERENCE SCANIDS ")
     def SCANIDS(self,p):
         L=[]
-        L.append(p.REFERENCE)
+        L.append(p.REFERENCE[1])
         
         L += p.SCANIDS
         return L
@@ -445,7 +428,7 @@ class CParser(Parser):
     @_('"," INSTR PRINTIDS')
     def PRINTIDS(self,p):
         L=[]
-        L.append(p.INSTR)
+        L.append(p.INSTR[1])
         
         L += p.PRINTIDS
         return L
@@ -761,7 +744,7 @@ if __name__ == '__main__':
     parser = CParser()
     text = ""
     #try:
-    with open('aritmetics.txt',"r") as f:
+    with open('input.txt',"r") as f:
         text = f.read()
         f.close()
 

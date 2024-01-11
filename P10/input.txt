@@ -1,16 +1,20 @@
 int h,g,e;
-int factorial(int a, int* b){
+int f(int a, int* b){
+    int y = 2;
     if(a != 0){
         a = 2;
     }
-    int y = 2;
-    a = a+7;
+    
+    printf("Escriba un numero");
+    scanf("%d",&a);
+    printf("Ha escrito: %d",a);
+    return a;
 }
 
 
 int main(){
     int b = 2;
-    int x = factorial(1, &h);
+    int x = f(1, &h);
     return 0;
 }
 
