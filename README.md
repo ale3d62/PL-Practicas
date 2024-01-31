@@ -1,6 +1,6 @@
 # PL-Practicas #
 
-A C to x86 translator using Python and [SLY](https://pypi.org/project/sly/).
+A C to x86 translator using Python and [SLY](https://pypi.org/project/sly/) for the Languaje processors subject.
 
 ## Features ##
 
